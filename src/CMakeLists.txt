@@ -5,7 +5,7 @@ target_include_directories(
   PUBLIC ${clocks_SOURCE_DIR}/include
   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
-target_sources(clocks_vm PUBLIC chunk.c memory.c debug.c)
+target_sources(clocks_vm PUBLIC chunk.c memory.c debug.c value.c)
 
 add_executable(clocks_repl)
 set_target_properties(clocks_repl PROPERTIES OUTPUT_NAME "clocks")
