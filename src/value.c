@@ -4,6 +4,24 @@
 
 #include <clocks/memory.h>
 
+bool values_equal(const Value a, const Value b)
+{
+    if (a.type != b.type)
+        return false;
+
+    switch (a.type)
+    {
+        case ValBool:
+            return AS_BOOL(a) == AS_BOOL(b);
+        case ValNil:
+            return true;
+        case ValNumber:
+            return AS_NUMBER(a) == AS_NUMBER(b);
+        default:
+            return false;
+    }
+}
+
 void init_value_array(ValueArray* array)
 {
     array->count    = 0;
