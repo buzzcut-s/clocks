@@ -17,6 +17,7 @@ int main(int argc, const char* argv[])
     write_chunk(&chunk, constant, 123);
 
     disassemble_chunk(&chunk, "test chunk");
+    interpret(&chunk);
 
     free_vm();
     free_chunk(&chunk);
