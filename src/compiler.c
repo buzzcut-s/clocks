@@ -7,6 +7,10 @@
 #include <clocks/common.h>
 #include <clocks/scanner.h>
 
+#ifdef DEBUG_PRINT_CODE
+#include <clocks/debug.h>
+#endif
+
 typedef struct
 {
     Token current;
@@ -138,6 +142,10 @@ static void emit_constant(Value value)
 static void end_compiler()
 {
     emit_return();
+#ifdef DEBUG_PRINT_CODE
+    if (!parser.had_error)
+        disassemble_chunk(current_chunk(), "code");
+#endif
 }
 
 static void grouping()
