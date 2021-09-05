@@ -33,7 +33,7 @@ static char* read_file(const char* path)
     }
 
     fseek(file, 0L, SEEK_END);
-    size_t file_size = ftell(file);
+    const size_t file_size = ftell(file);
     fseek(file, 0L, SEEK_SET);
 
     char* buffer = (char*)malloc(file_size + 1);
@@ -43,7 +43,7 @@ static char* read_file(const char* path)
         exit(74);
     }
 
-    size_t bytes_read = fread(buffer, sizeof(char), file_size, file);
+    const size_t bytes_read = fread(buffer, sizeof(char), file_size, file);
     if (bytes_read < file_size)
     {
         fprintf(stderr, "Could not read file \"%s\".\n", path);
@@ -60,7 +60,7 @@ static void run_file(const char* path)
 {
     char* source = read_file(path);
 
-    InterpretResult result = interpret(source);
+    const InterpretResult result = interpret(source);
     free(source);
 
     if (result == InterpretCompileError)

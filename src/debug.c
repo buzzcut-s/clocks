@@ -5,7 +5,7 @@
 #include <clocks/chunk.h>
 #include <clocks/common.h>
 
-void disassemble_chunk(Chunk* chunk, const char* name)
+void disassemble_chunk(const Chunk* chunk, const char* name)
 {
     printf("== %s ==\n", name);
 
@@ -15,9 +15,9 @@ void disassemble_chunk(Chunk* chunk, const char* name)
     }
 }
 
-static int constant_instruction(const char* name, Chunk* chunk, int offset)
+static int constant_instruction(const char* name, const Chunk* chunk, const int offset)
 {
-    uint8_t constant = chunk->code[offset + 1];
+    const uint8_t constant = chunk->code[offset + 1];
 
     printf("%-16s %4d '", name, constant);
     print_value(chunk->constants.values[constant]);
@@ -26,13 +26,13 @@ static int constant_instruction(const char* name, Chunk* chunk, int offset)
     return offset + 2;
 }
 
-static int simple_instruction(const char* name, int offset)
+static int simple_instruction(const char* name, const int offset)
 {
     printf("%s\n", name);
     return offset + 1;
 }
 
-int disassemble_instruction(Chunk* chunk, int offset)
+int disassemble_instruction(const Chunk* chunk, const int offset)
 {
     printf("%04d ", offset);
 
@@ -41,7 +41,7 @@ int disassemble_instruction(Chunk* chunk, int offset)
     else
         printf("%4d ", chunk->lines[offset]);
 
-    uint8_t instruction = chunk->code[offset];
+    const uint8_t instruction = chunk->code[offset];
     switch (instruction)
     {
         case OpConstant:

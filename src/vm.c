@@ -40,12 +40,12 @@ static InterpretResult run()
 {
 #define READ_BYTE()     (*vm.ip++)
 #define READ_CONSTANT() (vm.chunk->constants.values[READ_BYTE()])
-#define BINARY_OP(op)     \
-    do {                  \
-        double b = pop(); \
-        double a = pop(); \
-        push(a op b);     \
-    }                     \
+#define BINARY_OP(op)           \
+    do {                        \
+        const double b = pop(); \
+        const double a = pop(); \
+        push(a op b);           \
+    }                           \
     while (false)
 
     while (true)
@@ -61,12 +61,12 @@ static InterpretResult run()
         printf("\n");
         disassemble_instruction(vm.chunk, (int)(vm.ip - vm.chunk->code));
 #endif
-        uint8_t instruction = READ_BYTE();
+        const uint8_t instruction = READ_BYTE();
         switch (instruction)
         {
             case OpConstant:
             {
-                Value constant = READ_CONSTANT();
+                const Value constant = READ_CONSTANT();
                 push(constant);
                 print_value(constant);
                 printf("\n");
@@ -116,7 +116,7 @@ InterpretResult interpret(const char* source)
     vm.chunk = &chunk;
     vm.ip    = vm.chunk->code;
 
-    InterpretResult result = run();
+    const InterpretResult result = run();
 
     free_chunk(&chunk);
     return result;

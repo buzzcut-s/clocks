@@ -38,15 +38,15 @@ typedef void (*ParseFn)();
 
 typedef struct
 {
-    ParseFn    prefix;
-    ParseFn    infix;
-    Precedence prec;
+    const ParseFn    prefix;
+    const ParseFn    infix;
+    const Precedence prec;
 } ParseRule;
 
 Parser parser;
 Chunk* compiling_chunk;
 
-static ParseRule* get_rule(TokenType type);
+static const ParseRule* get_rule(TokenType type);
 
 static void parse_precedence(Precedence prec);
 
@@ -57,7 +57,7 @@ static Chunk* current_chunk()
     return compiling_chunk;
 }
 
-static void error_at(Token* token, const char* message)
+static void error_at(const Token* token, const char* message)
 {
     if (parser.panic_mode)
         return;
@@ -99,7 +99,7 @@ static void advance()
     }
 }
 
-static void consume(TokenType type, const char* message)
+static void consume(const TokenType type, const char* message)
 {
     if (parser.current.type == type)
         advance();
@@ -107,12 +107,12 @@ static void consume(TokenType type, const char* message)
         error_at_current(message);
 }
 
-static void emit_byte(uint8_t byte)
+static void emit_byte(const uint8_t byte)
 {
     write_chunk(current_chunk(), byte, parser.previous.line);
 }
 
-static void emit_bytes(uint8_t byte1, uint8_t byte2)
+static void emit_bytes(const uint8_t byte1, const uint8_t byte2)
 {
     emit_byte(byte1);
     emit_byte(byte2);
@@ -123,7 +123,7 @@ static void emit_return()
     emit_byte(OpReturn);
 }
 
-static uint8_t make_constant(Value value)
+static uint8_t make_constant(const Value value)
 {
     int constant = add_constant(current_chunk(), value);
     if (constant > UINT8_MAX)
@@ -134,7 +134,7 @@ static uint8_t make_constant(Value value)
     return (uint8_t)constant;
 }
 
-static void emit_constant(Value value)
+static void emit_constant(const Value value)
 {
     emit_bytes(OpConstant, make_constant(value));
 }
@@ -156,13 +156,13 @@ static void grouping()
 
 static void number()
 {
-    double value = strtod(parser.previous.start, NULL);
+    const double value = strtod(parser.previous.start, NULL);
     emit_constant(value);
 }
 
 static void unary()
 {
-    TokenType op_type = parser.previous.type;
+    const TokenType op_type = parser.previous.type;
 
     parse_precedence(PrecUnary);
 
@@ -178,8 +178,8 @@ static void unary()
 
 static void binary()
 {
-    TokenType  op_type = parser.previous.type;
-    ParseRule* rule    = get_rule(op_type);
+    const TokenType  op_type = parser.previous.type;
+    const ParseRule* rule    = get_rule(op_type);
 
     parse_precedence((Precedence)(rule->prec + 1));
 
@@ -202,7 +202,7 @@ static void binary()
     }
 }
 
-ParseRule rules[] = {
+const ParseRule RULES[] = {
   [TokenLeftParen]    = {grouping, NULL, PrecNone},
   [TokenRightParen]   = {NULL, NULL, PrecNone},
   [TokenLeftBrace]    = {NULL, NULL, PrecNone},
@@ -245,16 +245,16 @@ ParseRule rules[] = {
   [TokenEof]          = {NULL, NULL, PrecNone},
 };
 
-static ParseRule* get_rule(TokenType type)
+static const ParseRule* get_rule(const TokenType type)
 {
-    return &rules[type];
+    return &RULES[type];
 }
 
-static void parse_precedence(Precedence prec)
+static void parse_precedence(const Precedence prec)
 {
     advance();
 
-    ParseFn prefix_rule = get_rule(parser.previous.type)->prefix;
+    const ParseFn prefix_rule = get_rule(parser.previous.type)->prefix;
     if (prefix_rule == NULL)
     {
         error("Expect expression.");
@@ -266,7 +266,7 @@ static void parse_precedence(Precedence prec)
     while (prec <= get_rule(parser.current.type)->prec)
     {
         advance();
-        ParseFn infix_rule = get_rule(parser.previous.type)->infix;
+        const ParseFn infix_rule = get_rule(parser.previous.type)->infix;
         infix_rule();
     }
 }
