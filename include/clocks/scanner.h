@@ -35,4 +35,6 @@ typedef struct
 
 void init_scanner(const char* source);
 
+Token scan_token();
+
 #endif  // SCANNER_H
