@@ -2,10 +2,10 @@
 
 #include <stdio.h>
 
-#include "clocks/debug.h"
 #include <clocks/chunk.h>
 #include <clocks/common.h>
 #include <clocks/compiler.h>
+#include <clocks/debug.h>
 #include <clocks/value.h>
 
 VM vm;
@@ -61,8 +61,8 @@ static InterpretResult run()
         printf("\n");
         disassemble_instruction(vm.chunk, (int)(vm.ip - vm.chunk->code));
 #endif
-        uint8_t instruction;
-        switch (instruction = READ_BYTE())
+        uint8_t instruction = READ_BYTE();
+        switch (instruction)
         {
             case OpConstant:
             {
