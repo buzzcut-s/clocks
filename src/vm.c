@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 
+#include "clocks/debug.h"
 #include <clocks/chunk.h>
 #include <clocks/common.h>
 #include <clocks/value.h>
@@ -23,6 +24,9 @@ static InterpretResult run()
 
     while (true)
     {
+#ifdef DEBUG_TRACE_EXECUTION
+        disassemble_instruction(vm.chunk, (int)(vm.ip - vm.chunk->code));
+#endif
         uint8_t instruction;
         switch (instruction = READ_BYTE())
         {
