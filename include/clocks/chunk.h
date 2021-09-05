@@ -7,6 +7,7 @@
 typedef enum
 {
     OpConstant,
+    OpNegate,
     OpReturn,
 } OpCode;
 

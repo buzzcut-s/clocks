@@ -65,6 +65,12 @@ static InterpretResult run()
                 break;
             }
 
+            case OpNegate:
+            {
+                push(-pop());
+                break;
+            }
+
             case OpReturn:
             {
                 print_value(pop());
