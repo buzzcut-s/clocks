@@ -34,5 +34,5 @@ void write_value_array(ValueArray* array, const Value value)
 
 void print_value(const Value value)
 {
-    printf("%g", value);
+    printf("%g", AS_NUMBER(value));
 }

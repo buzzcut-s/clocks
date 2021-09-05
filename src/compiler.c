@@ -6,6 +6,7 @@
 #include <clocks/chunk.h>
 #include <clocks/common.h>
 #include <clocks/scanner.h>
+#include <clocks/value.h>
 
 #ifdef DEBUG_PRINT_CODE
 #include <clocks/debug.h>
@@ -157,7 +158,7 @@ static void grouping()
 static void number()
 {
     const double value = strtod(parser.previous.start, NULL);
-    emit_constant(value);
+    emit_constant(NUMBER_VAL(value));
 }
 
 static void unary()
