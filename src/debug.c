@@ -44,10 +44,10 @@ int disassemble_instruction(Chunk* chunk, int offset)
     uint8_t instruction = chunk->code[offset];
     switch (instruction)
     {
-        case OP_CONSTANT:
+        case OpConstant:
             return constant_instruction("OP_CONSTANT", chunk, offset);
 
-        case OP_RETURN:
+        case OpReturn:
             return simple_instruction("OP_RETURN", offset);
 
         default:

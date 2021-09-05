@@ -17,9 +17,9 @@ typedef struct
 
 typedef enum
 {
-    INTERPRET_OK,
-    INTERPRET_COMPILE_ERROR,
-    INTERPRET_RUNTIME_ERROR
+    InterpretOk,
+    InterpretCompileError,
+    InterpretRuntimeError
 } InterpretResult;
 
 void init_vm();
