@@ -15,8 +15,38 @@ typedef struct
     bool  panic_mode;
 } Parser;
 
+typedef enum
+{
+    PrecNone,
+    PrecAssignment,  // =
+    PrecOr,          // or
+    PrecAnd,         // and
+    PrecEquality,    // == !=
+    PrecComparison,  // < > <= >=
+    PrecTerm,        // + -
+    PrecFactor,      // * /
+    PrecUnary,       // ! -
+    PrecCall,        // . ()
+    PrecPrimary
+} Precedence;
+
+typedef void (*ParseFn)();
+
+typedef struct
+{
+    ParseFn    prefix;
+    ParseFn    infix;
+    Precedence prec;
+} ParseRule;
+
 Parser parser;
 Chunk* compiling_chunk;
+
+static ParseRule* get_rule(TokenType type);
+
+static void parse_precedence(Precedence prec);
+
+static void expression();
 
 static Chunk* current_chunk()
 {
@@ -110,10 +140,132 @@ static void end_compiler()
     emit_return();
 }
 
+static void grouping()
+{
+    expression();
+    consume(TokenRightParen, "Expect ')' after expression.");
+}
+
 static void number()
 {
     double value = strtod(parser.previous.start, NULL);
     emit_constant(value);
+}
+
+static void unary()
+{
+    TokenType op_type = parser.previous.type;
+
+    parse_precedence(PrecUnary);
+
+    switch (op_type)
+    {
+        case TokenMinus:
+            emit_byte(OpNegate);
+            break;
+        default:
+            return;
+    }
+}
+
+static void binary()
+{
+    TokenType  op_type = parser.previous.type;
+    ParseRule* rule    = get_rule(op_type);
+
+    parse_precedence((Precedence)(rule->prec + 1));
+
+    switch (op_type)
+    {
+        case TokenPlus:
+            emit_byte(OpAdd);
+            break;
+        case TokenMinus:
+            emit_byte(OpSubtract);
+            break;
+        case TokenStar:
+            emit_byte(OpMultiply);
+            break;
+        case TokenSlash:
+            emit_byte(OpDivide);
+            break;
+        default:
+            return;
+    }
+}
+
+ParseRule rules[] = {
+  [TokenLeftParen]    = {grouping, NULL, PrecNone},
+  [TokenRightParen]   = {NULL, NULL, PrecNone},
+  [TokenLeftBrace]    = {NULL, NULL, PrecNone},
+  [TokenRightBrace]   = {NULL, NULL, PrecNone},
+  [TokenComma]        = {NULL, NULL, PrecNone},
+  [TokenDot]          = {NULL, NULL, PrecNone},
+  [TokenMinus]        = {unary, binary, PrecTerm},
+  [TokenPlus]         = {NULL, binary, PrecTerm},
+  [TokenSemicolon]    = {NULL, NULL, PrecNone},
+  [TokenSlash]        = {NULL, binary, PrecFactor},
+  [TokenStar]         = {NULL, binary, PrecFactor},
+  [TokenBang]         = {NULL, NULL, PrecNone},
+  [TokenBangEqual]    = {NULL, NULL, PrecNone},
+  [TokenEqual]        = {NULL, NULL, PrecNone},
+  [TokenEqualEqual]   = {NULL, NULL, PrecNone},
+  [TokenGreater]      = {NULL, NULL, PrecNone},
+  [TokenGreaterEqual] = {NULL, NULL, PrecNone},
+  [TokenLess]         = {NULL, NULL, PrecNone},
+  [TokenLessEqual]    = {NULL, NULL, PrecNone},
+  [TokenIdentifier]   = {NULL, NULL, PrecNone},
+  [TokenString]       = {NULL, NULL, PrecNone},
+  [TokenNumber]       = {number, NULL, PrecNone},
+  [TokenAnd]          = {NULL, NULL, PrecNone},
+  [TokenClass]        = {NULL, NULL, PrecNone},
+  [TokenElse]         = {NULL, NULL, PrecNone},
+  [TokenFalse]        = {NULL, NULL, PrecNone},
+  [TokenFor]          = {NULL, NULL, PrecNone},
+  [TokenFun]          = {NULL, NULL, PrecNone},
+  [TokenIf]           = {NULL, NULL, PrecNone},
+  [TokenNil]          = {NULL, NULL, PrecNone},
+  [TokenOr]           = {NULL, NULL, PrecNone},
+  [TokenPrint]        = {NULL, NULL, PrecNone},
+  [TokenReturn]       = {NULL, NULL, PrecNone},
+  [TokenSuper]        = {NULL, NULL, PrecNone},
+  [TokenThis]         = {NULL, NULL, PrecNone},
+  [TokenTrue]         = {NULL, NULL, PrecNone},
+  [TokenVar]          = {NULL, NULL, PrecNone},
+  [TokenWhile]        = {NULL, NULL, PrecNone},
+  [TokenError]        = {NULL, NULL, PrecNone},
+  [TokenEof]          = {NULL, NULL, PrecNone},
+};
+
+static ParseRule* get_rule(TokenType type)
+{
+    return &rules[type];
+}
+
+static void parse_precedence(Precedence prec)
+{
+    advance();
+
+    ParseFn prefix_rule = get_rule(parser.previous.type)->prefix;
+    if (prefix_rule == NULL)
+    {
+        error("Expect expression.");
+        return;
+    }
+
+    prefix_rule();
+
+    while (prec <= get_rule(parser.current.type)->prec)
+    {
+        advance();
+        ParseFn infix_rule = get_rule(parser.previous.type)->infix;
+        infix_rule();
+    }
+}
+
+static void expression()
+{
+    parse_precedence(PrecAssignment);
 }
 
 bool compile(const char* source, Chunk* chunk)
@@ -124,6 +276,7 @@ bool compile(const char* source, Chunk* chunk)
     parser.panic_mode = false;
 
     advance();
+    expression();
 
     consume(TokenEof, "Expect end of expression.");
     end_compiler();
