@@ -50,6 +50,15 @@ int disassemble_instruction(Chunk* chunk, int offset)
         case OpReturn:
             return simple_instruction("OP_RETURN", offset);
 
+        case OpAdd:
+            return simple_instruction("OP_ADD", offset);
+        case OpSubtract:
+            return simple_instruction("OP_SUBTRACT", offset);
+        case OpMultiply:
+            return simple_instruction("OP_MULTIPLY", offset);
+        case OpDivide:
+            return simple_instruction("OP_DIVIDE", offset);
+
         case OpNegate:
             return simple_instruction("OP_NEGATE", offset);
 
