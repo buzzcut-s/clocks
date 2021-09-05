@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <clocks/chunk.h>
 #include <clocks/common.h>
 #include <clocks/scanner.h>
 
@@ -15,12 +16,19 @@ typedef struct
 } Parser;
 
 Parser parser;
+Chunk* compiling_chunk;
+
+static Chunk* current_chunk()
+{
+    return compiling_chunk;
+}
 
 static void error_at(Token* token, const char* message)
 {
     if (parser.panic_mode)
         return;
     parser.panic_mode = true;
+    parser.had_error  = true;
 
     fprintf(stderr, "[line %d] Error", token->line);
 
@@ -32,7 +40,6 @@ static void error_at(Token* token, const char* message)
         fprintf(stderr, " at '%.*s'", token->length, token->start);
 
     fprintf(stderr, ": %s\n", message);
-    parser.had_error = true;
 }
 
 static void error(const char* message)
@@ -66,14 +73,37 @@ static void consume(TokenType type, const char* message)
         error_at_current(message);
 }
 
+static void emit_byte(uint8_t byte)
+{
+    write_chunk(current_chunk(), byte, parser.previous.line);
+}
+
+static void emit_bytes(uint8_t byte1, uint8_t byte2)
+{
+    emit_byte(byte1);
+    emit_byte(byte2);
+}
+
+static void emit_return()
+{
+    emit_byte(OpReturn);
+}
+
+static void end_compiler()
+{
+    emit_return();
+}
+
 bool compile(const char* source, Chunk* chunk)
 {
     init_scanner(source);
+    compiling_chunk   = chunk;
     parser.had_error  = false;
     parser.panic_mode = false;
 
     advance();
 
     consume(TokenEof, "Expect end of expression.");
+    end_compiler();
     return !parser.had_error;
 }
