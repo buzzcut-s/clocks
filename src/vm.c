@@ -2,7 +2,9 @@
 
 #include <stdio.h>
 
+#include <clocks/chunk.h>
 #include <clocks/common.h>
+#include <clocks/value.h>
 
 VM vm;
 

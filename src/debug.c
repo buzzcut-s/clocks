@@ -2,6 +2,9 @@
 
 #include <stdio.h>
 
+#include <clocks/chunk.h>
+#include <clocks/common.h>
+
 void disassemble_chunk(Chunk* chunk, const char* name)
 {
     printf("== %s ==\n", name);
