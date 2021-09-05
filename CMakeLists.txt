@@ -7,4 +7,5 @@ project(
 
 set(CMAKE_C_STANDARD 11)
 
+add_subdirectory(lib)
 add_subdirectory(src)

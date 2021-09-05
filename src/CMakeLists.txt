@@ -25,4 +25,4 @@ target_include_directories(
 
 target_sources(clocks_repl PRIVATE main.c)
 
-target_link_libraries(clocks_repl PRIVATE clocks_vm)
+target_link_libraries(clocks_repl PRIVATE linenoise clocks_vm)

@@ -6,23 +6,21 @@
 #include <clocks/common.h>
 #include <clocks/debug.h>
 #include <clocks/vm.h>
+#include <linenoise/linenoise.h>
 
 static void repl()
 {
-    char line[1024];
+    linenoiseHistoryLoad(".clocks_history");
 
-    while (true)
+    char* line = NULL;
+    while ((line = linenoise("clocks > ")) != NULL)
     {
-        printf("clocks > ");
-
-        if (!fgets(line, sizeof(line), stdin))
-        {
-            printf("\n");
-            break;
-        }
+        linenoiseHistoryAdd(line);
+        linenoiseHistorySave(".clocks_history");
 
         interpret(line);
     }
+    free(line);
 }
 
 static char* read_file(const char* path)
