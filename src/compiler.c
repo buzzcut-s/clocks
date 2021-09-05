@@ -189,6 +189,25 @@ static void binary()
 
     switch (op_type)
     {
+        case TokenBangEqual:
+            emit_bytes(OpEqual, OpNot);
+            break;
+        case TokenEqualEqual:
+            emit_byte(OpEqual);
+            break;
+        case TokenGreater:
+            emit_byte(OpGreater);
+            break;
+        case TokenGreaterEqual:
+            emit_bytes(OpLess, OpNot);
+            break;
+        case TokenLess:
+            emit_byte(OpLess);
+            break;
+        case TokenLessEqual:
+            emit_bytes(OpGreater, OpNot);
+            break;
+
         case TokenPlus:
             emit_byte(OpAdd);
             break;
@@ -237,13 +256,13 @@ const ParseRule RULES[] = {
   [TokenSlash]        = {NULL, binary, PrecFactor},
   [TokenStar]         = {NULL, binary, PrecFactor},
   [TokenBang]         = {unary, NULL, PrecNone},
-  [TokenBangEqual]    = {NULL, NULL, PrecNone},
+  [TokenBangEqual]    = {NULL, binary, PrecEquality},
   [TokenEqual]        = {NULL, NULL, PrecNone},
-  [TokenEqualEqual]   = {NULL, NULL, PrecNone},
-  [TokenGreater]      = {NULL, NULL, PrecNone},
-  [TokenGreaterEqual] = {NULL, NULL, PrecNone},
-  [TokenLess]         = {NULL, NULL, PrecNone},
-  [TokenLessEqual]    = {NULL, NULL, PrecNone},
+  [TokenEqualEqual]   = {NULL, binary, PrecEquality},
+  [TokenGreater]      = {NULL, binary, PrecComparison},
+  [TokenGreaterEqual] = {NULL, binary, PrecComparison},
+  [TokenLess]         = {NULL, binary, PrecComparison},
+  [TokenLessEqual]    = {NULL, binary, PrecComparison},
   [TokenIdentifier]   = {NULL, NULL, PrecNone},
   [TokenString]       = {NULL, NULL, PrecNone},
   [TokenNumber]       = {number, NULL, PrecNone},
