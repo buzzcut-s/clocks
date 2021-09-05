@@ -9,12 +9,30 @@
 
 VM vm;
 
+static void reset_stack()
+{
+    vm.stack_top = vm.stack;
+}
+
 void init_vm()
 {
+    reset_stack();
 }
 
 void free_vm()
 {
+}
+
+void push(Value value)
+{
+    *vm.stack_top = value;
+    vm.stack_top++;
+}
+
+Value pop()
+{
+    vm.stack_top--;
+    return *vm.stack_top;
 }
 
 static InterpretResult run()
@@ -33,6 +51,7 @@ static InterpretResult run()
             case OP_CONSTANT:
             {
                 Value constant = READ_CONSTANT();
+                push(constant);
                 print_value(constant);
                 printf("\n");
                 break;
@@ -40,6 +59,8 @@ static InterpretResult run()
 
             case OP_RETURN:
             {
+                print_value(pop());
+                printf("\n");
                 return INTERPRET_OK;
             }
         }
