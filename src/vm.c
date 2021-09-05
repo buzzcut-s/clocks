@@ -56,6 +56,11 @@ static Value peek(const int distance)
     return vm.stack_top[-1 - distance];
 }
 
+static bool is_falsey(const Value value)
+{
+    return IS_NIL(value) || (IS_BOOL(value) && !AS_BOOL(value));
+}
+
 static InterpretResult run()
 {
 #define READ_BYTE()     (*vm.ip++)
@@ -97,6 +102,10 @@ static InterpretResult run()
                 printf("\n");
                 break;
             }
+
+            case OpNot:
+                push(BOOL_VAL(is_falsey(pop())));
+                break;
 
             case OpNegate:
                 if (!IS_NUMBER(peek(0)))

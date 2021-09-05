@@ -14,6 +14,7 @@ typedef enum
     OpSubtract,
     OpMultiply,
     OpDivide,
+    OpNot,
     OpNegate,
     OpReturn,
 } OpCode;

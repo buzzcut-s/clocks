@@ -172,6 +172,9 @@ static void unary()
         case TokenMinus:
             emit_byte(OpNegate);
             break;
+        case TokenBang:
+            emit_byte(OpNot);
+            break;
         default:
             return;
     }
@@ -233,7 +236,7 @@ const ParseRule RULES[] = {
   [TokenSemicolon]    = {NULL, NULL, PrecNone},
   [TokenSlash]        = {NULL, binary, PrecFactor},
   [TokenStar]         = {NULL, binary, PrecFactor},
-  [TokenBang]         = {NULL, NULL, PrecNone},
+  [TokenBang]         = {unary, NULL, PrecNone},
   [TokenBangEqual]    = {NULL, NULL, PrecNone},
   [TokenEqual]        = {NULL, NULL, PrecNone},
   [TokenEqualEqual]   = {NULL, NULL, PrecNone},
