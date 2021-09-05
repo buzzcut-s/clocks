@@ -203,6 +203,24 @@ static void binary()
     }
 }
 
+static void literal()
+{
+    switch (parser.previous.type)
+    {
+        case TokenNil:
+            emit_byte(OpNil);
+            break;
+        case TokenTrue:
+            emit_byte(OpTrue);
+            break;
+        case TokenFalse:
+            emit_byte(OpFalse);
+            break;
+        default:
+            return;
+    }
+}
+
 const ParseRule RULES[] = {
   [TokenLeftParen]    = {grouping, NULL, PrecNone},
   [TokenRightParen]   = {NULL, NULL, PrecNone},
@@ -229,17 +247,17 @@ const ParseRule RULES[] = {
   [TokenAnd]          = {NULL, NULL, PrecNone},
   [TokenClass]        = {NULL, NULL, PrecNone},
   [TokenElse]         = {NULL, NULL, PrecNone},
-  [TokenFalse]        = {NULL, NULL, PrecNone},
+  [TokenFalse]        = {literal, NULL, PrecNone},
   [TokenFor]          = {NULL, NULL, PrecNone},
   [TokenFun]          = {NULL, NULL, PrecNone},
   [TokenIf]           = {NULL, NULL, PrecNone},
-  [TokenNil]          = {NULL, NULL, PrecNone},
+  [TokenNil]          = {literal, NULL, PrecNone},
   [TokenOr]           = {NULL, NULL, PrecNone},
   [TokenPrint]        = {NULL, NULL, PrecNone},
   [TokenReturn]       = {NULL, NULL, PrecNone},
   [TokenSuper]        = {NULL, NULL, PrecNone},
   [TokenThis]         = {NULL, NULL, PrecNone},
-  [TokenTrue]         = {NULL, NULL, PrecNone},
+  [TokenTrue]         = {literal, NULL, PrecNone},
   [TokenVar]          = {NULL, NULL, PrecNone},
   [TokenWhile]        = {NULL, NULL, PrecNone},
   [TokenError]        = {NULL, NULL, PrecNone},

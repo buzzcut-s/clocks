@@ -7,6 +7,9 @@
 typedef enum
 {
     OpConstant,
+    OpNil,
+    OpTrue,
+    OpFalse,
     OpAdd,
     OpSubtract,
     OpMultiply,

@@ -50,6 +50,13 @@ int disassemble_instruction(const Chunk* chunk, const int offset)
         case OpReturn:
             return simple_instruction("OpReturn", offset);
 
+        case OpNil:
+            return simple_instruction("OpNil", offset);
+        case OpTrue:
+            return simple_instruction("OpTrue", offset);
+        case OpFalse:
+            return simple_instruction("OpFalse", offset);
+
         case OpAdd:
             return simple_instruction("OpAdd", offset);
         case OpSubtract:

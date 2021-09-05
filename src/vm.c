@@ -107,6 +107,16 @@ static InterpretResult run()
                 push(NUMBER_VAL(-AS_NUMBER(pop())));
                 break;
 
+            case OpNil:
+                push(NIL_VAL);
+                break;
+            case OpTrue:
+                push(BOOL_VAL(true));
+                break;
+            case OpFalse:
+                push(BOOL_VAL(false));
+                break;
+
             case OpAdd:
                 BINARY_OP(NUMBER_VAL, +);
                 break;
