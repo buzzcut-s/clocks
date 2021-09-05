@@ -89,9 +89,31 @@ static void emit_return()
     emit_byte(OpReturn);
 }
 
+static uint8_t make_constant(Value value)
+{
+    int constant = add_constant(current_chunk(), value);
+    if (constant > UINT8_MAX)
+    {
+        error("Too many constants in one chunk.");
+        return 0;
+    }
+    return (uint8_t)constant;
+}
+
+static void emit_constant(Value value)
+{
+    emit_bytes(OpConstant, make_constant(value));
+}
+
 static void end_compiler()
 {
     emit_return();
+}
+
+static void number()
+{
+    double value = strtod(parser.previous.start, NULL);
+    emit_constant(value);
 }
 
 bool compile(const char* source, Chunk* chunk)
