@@ -5,6 +5,7 @@
 
 #include <clocks/chunk.h>
 #include <clocks/common.h>
+#include <clocks/object.h>
 #include <clocks/scanner.h>
 #include <clocks/value.h>
 
@@ -161,6 +162,12 @@ static void number()
     emit_constant(NUMBER_VAL(value));
 }
 
+static void string()
+{
+    emit_constant(OBJ_VAL(copy_string(parser.previous.start + 1,
+                                      parser.previous.length - 2)));
+}
+
 static void unary()
 {
     const TokenType op_type = parser.previous.type;
@@ -264,7 +271,7 @@ const ParseRule RULES[] = {
   [TokenLess]         = {NULL, binary, PrecComparison},
   [TokenLessEqual]    = {NULL, binary, PrecComparison},
   [TokenIdentifier]   = {NULL, NULL, PrecNone},
-  [TokenString]       = {NULL, NULL, PrecNone},
+  [TokenString]       = {string, NULL, PrecNone},
   [TokenNumber]       = {number, NULL, PrecNone},
   [TokenAnd]          = {NULL, NULL, PrecNone},
   [TokenClass]        = {NULL, NULL, PrecNone},
