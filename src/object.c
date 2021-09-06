@@ -1,5 +1,6 @@
 #include "clocks/object.h"
 
+#include <stdio.h>
 #include <string.h>
 
 #include <clocks/memory.h>
@@ -20,6 +21,16 @@ static ObjString* allocate_string(char* chars, const int length)
     string->length    = length;
     string->chars     = chars;
     return string;
+}
+
+void print_object(const Value* value)
+{
+    switch (OBJ_TYPE(*value))
+    {
+        case ObjTypeString:
+            printf("%s", AS_CSTRING(*value));
+            break;
+    }
 }
 
 ObjString* copy_string(const char* chars, int length)

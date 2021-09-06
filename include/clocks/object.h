@@ -15,6 +15,8 @@ struct Obj
 
 #define OBJ_TYPE(value) (AS_OBJ(value)->type)
 
+void print_object(const Value* value);
+
 typedef struct ObjString
 {
     Obj   obj;

@@ -3,6 +3,7 @@
 #include <stdio.h>
 
 #include <clocks/memory.h>
+#include <clocks/object.h>
 
 bool values_equal(const Value a, const Value b)
 {
@@ -62,6 +63,9 @@ void print_value(const Value value)
             break;
         case ValNumber:
             printf("%g", AS_NUMBER(value));
+            break;
+        case ValObj:
+            print_object(&value);
             break;
     }
 }
