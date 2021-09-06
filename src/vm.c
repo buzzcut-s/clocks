@@ -41,6 +41,7 @@ void init_vm()
 
 void free_vm()
 {
+    free_objects();
 }
 
 void push(const Value value)
