@@ -33,6 +33,11 @@ void print_object(const Value* value)
     }
 }
 
+ObjString* take_string(char* chars, const int length)
+{
+    return allocate_string(chars, length);
+}
+
 ObjString* copy_string(const char* chars, int length)
 {
     char* heap_chars = ALLOCATE(char, length + 1);

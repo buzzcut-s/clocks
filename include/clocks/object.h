@@ -15,6 +15,11 @@ struct Obj
 
 #define OBJ_TYPE(value) (AS_OBJ(value)->type)
 
+static inline bool is_obj_type(const Value value, const ObjType type)
+{
+    return IS_OBJ(value) && AS_OBJ(value)->type == type;
+}
+
 void print_object(const Value* value);
 
 typedef struct ObjString
@@ -24,15 +29,11 @@ typedef struct ObjString
     char* chars;
 } ObjString;
 
-#define IS_STRING(value)  is_obj_type(&(value), ObjTypeString)
+#define IS_STRING(value)  is_obj_type(value, ObjTypeString)
 #define AS_STRING(value)  ((ObjString*)AS_OBJ(value))
 #define AS_CSTRING(value) (((ObjString*)AS_OBJ(value))->chars)
 
+ObjString* take_string(char* chars, int length);
 ObjString* copy_string(const char* chars, int length);
-
-static inline bool is_obj_type(const Value* value, const ObjType type)
-{
-    return IS_OBJ(*value) && AS_OBJ(*value)->type == type;
-}
 
 #endif  // OBJECT_H
