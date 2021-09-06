@@ -10,7 +10,8 @@ typedef enum
 
 struct Obj
 {
-    ObjType type;
+    ObjType     type;
+    struct Obj* next;
 };
 
 #define OBJ_TYPE(value) (AS_OBJ(value)->type)

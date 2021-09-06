@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include <clocks/memory.h>
+#include <clocks/vm.h>
 
 #define ALLOCATE_OBJ(type, obj_type) \
     (type*)allocate_obj(sizeof(type), obj_type)
@@ -12,6 +13,10 @@ static Obj* allocate_obj(const size_t size, const ObjType type)
 {
     Obj* object  = (Obj*)reallocate(NULL, 0, size);
     object->type = type;
+
+    object->next = vm.obj_head;
+    vm.obj_head  = object;
+
     return object;
 }
 

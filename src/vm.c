@@ -36,6 +36,7 @@ static void runtime_error(const char* format, ...)
 void init_vm()
 {
     reset_stack();
+    vm.obj_head = NULL;
 }
 
 void free_vm()
