@@ -1,6 +1,7 @@
 #include "clocks/value.h"
 
 #include <stdio.h>
+#include <string.h>
 
 #include <clocks/memory.h>
 #include <clocks/object.h>
@@ -18,6 +19,13 @@ bool values_equal(const Value a, const Value b)
             return true;
         case ValNumber:
             return AS_NUMBER(a) == AS_NUMBER(b);
+        case ValObj:
+        {
+            const ObjString* a_str = AS_STRING(a);
+            const ObjString* b_str = AS_STRING(b);
+            return a_str->length == b_str->length
+                   && memcmp(a_str->chars, b_str->chars, a_str->length) == 0;
+        }
         default:
             return false;
     }
