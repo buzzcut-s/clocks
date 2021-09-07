@@ -163,7 +163,7 @@ static InterpretResult run()
 
             case OpReadGlobal:
             {
-                ObjString* name = READ_STRING();
+                const ObjString* name = READ_STRING();
 
                 Value value;
                 if (!table_find(&vm.globals, name, &value))
