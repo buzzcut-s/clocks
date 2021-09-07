@@ -10,6 +10,7 @@ typedef enum
     OpNil,
     OpTrue,
     OpFalse,
+    OpPop,
     OpEqual,
     OpGreater,
     OpLess,

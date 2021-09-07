@@ -137,6 +137,10 @@ static InterpretResult run()
                 push(BOOL_VAL(false));
                 break;
 
+            case OpPop:
+                pop();
+                break;
+
             case OpEqual:
             {
                 const Value b = pop();

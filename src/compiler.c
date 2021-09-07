@@ -345,10 +345,19 @@ static void print_statement()
     emit_byte(OpPrint);
 }
 
+static void expression_statement()
+{
+    expression();
+    consume(TokenSemicolon, "Expect ';' after value.");
+    emit_byte(OpPop);
+}
+
 static void statement()
 {
     if (match(TokenPrint))
         print_statement();
+    else
+        expression_statement();
 }
 
 static void declaration()

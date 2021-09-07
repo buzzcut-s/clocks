@@ -54,6 +54,9 @@ int disassemble_instruction(const Chunk* chunk, const int offset)
         case OpFalse:
             return simple_instruction("OpFalse", offset);
 
+        case OpPop:
+            return simple_instruction("OpPop", offset);
+
         case OpEqual:
             return simple_instruction("OpEqual", offset);
         case OpGreater:
