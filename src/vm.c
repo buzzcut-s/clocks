@@ -127,19 +127,6 @@ static InterpretResult run()
                 break;
             }
 
-            case OpNot:
-                push(BOOL_VAL(is_falsey(pop())));
-                break;
-
-            case OpNegate:
-                if (!IS_NUMBER(peek(0)))
-                {
-                    runtime_error("Operand must be a number");
-                    return InterpretRuntimeError;
-                }
-                push(NUMBER_VAL(-AS_NUMBER(pop())));
-                break;
-
             case OpNil:
                 push(NIL_VAL);
                 break;
@@ -185,6 +172,19 @@ static InterpretResult run()
                 break;
             case OpDivide:
                 BINARY_OP(NUMBER_VAL, /);
+                break;
+
+            case OpNot:
+                push(BOOL_VAL(is_falsey(pop())));
+                break;
+
+            case OpNegate:
+                if (!IS_NUMBER(peek(0)))
+                {
+                    runtime_error("Operand must be a number");
+                    return InterpretRuntimeError;
+                }
+                push(NUMBER_VAL(-AS_NUMBER(pop())));
                 break;
 
             case OpReturn:
