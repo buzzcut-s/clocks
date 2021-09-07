@@ -127,12 +127,12 @@ static void consume(const TokenType type, const char* message)
         error_at_current(message);
 }
 
-static bool check(TokenType type)
+static bool check(const TokenType type)
 {
     return parser.current.type == type;
 }
 
-static bool match(TokenType type)
+static bool match(const TokenType type)
 {
     if (!check(type))
         return false;
@@ -158,7 +158,7 @@ static void emit_return()
 
 static uint8_t make_constant(const Value value)
 {
-    int constant = add_constant(current_chunk(), value);
+    const int constant = add_constant(current_chunk(), value);
     if (constant > UINT8_MAX)
     {
         error("Too many constants in one chunk.");
@@ -224,7 +224,7 @@ static void string(__attribute__((unused)) const bool can_assign)
 
 static void named_variable(const Token name, const bool can_assign)
 {
-    uint8_t arg = identifier_constant(&name);
+    const uint8_t arg = identifier_constant(&name);
 
     if (can_assign && match(TokenEqual))
     {
@@ -406,7 +406,7 @@ static bool identifiers_equal(const Token* a, const Token* b)
                                     : memcmp(a->start, b->start, a->length) == 0;
 }
 
-static void add_local(Token name)
+static void add_local(const Token name)
 {
     if (current->local_count == UINT8_COUNT)
     {
@@ -424,7 +424,7 @@ static void declare_variable()
     if (current->scope_depth == 0)
         return;
 
-    Token* name = &parser.previous;
+    const Token* name = &parser.previous;
     for (int i = current->local_count - 1; i >= 0; i--)
     {
         Local* local = &current->locals[i];
@@ -469,7 +469,7 @@ static void block()
 
 static void var_declaration()
 {
-    uint8_t global = parse_variable("Expect variable name.");
+    const uint8_t global = parse_variable("Expect variable name.");
 
     if (match(TokenEqual))
         expression();
