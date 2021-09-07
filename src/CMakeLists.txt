@@ -14,7 +14,8 @@ target_sources(
          vm.c
          scanner.c
          compiler.c
-         object.c)
+         object.c
+         table.c)
 
 add_executable(clocks_repl)
 set_target_properties(clocks_repl PROPERTIES OUTPUT_NAME "clocks")
