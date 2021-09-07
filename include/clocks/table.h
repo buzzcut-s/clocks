@@ -6,8 +6,8 @@
 
 typedef struct
 {
-    ObjString* key;
-    Value      value;
+    const ObjString* key;
+    Value            value;
 } Entry;
 
 typedef struct
@@ -19,5 +19,9 @@ typedef struct
 
 void init_table(Table* table);
 void free_table(Table* table);
+
+bool table_insert(Table* table, const ObjString* key, Value value);
+
+void table_copy(const Table* src, Table* dest);
 
 #endif  // TABLE_H
