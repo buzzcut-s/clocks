@@ -360,9 +360,36 @@ static void statement()
         expression_statement();
 }
 
+static void synchronize()
+{
+    parser.panic_mode = false;
+    while (parser.current.type != TokenEof)
+    {
+        if (parser.previous.type == TokenSemicolon)
+            return;
+        switch (parser.current.type)
+        {
+            case TokenClass:
+            case TokenFun:
+            case TokenVar:
+            case TokenFor:
+            case TokenIf:
+            case TokenWhile:
+            case TokenPrint:
+            case TokenReturn:
+                return;
+            default:
+            {
+            }
+        }
+    }
+}
+
 static void declaration()
 {
     statement();
+    if (parser.panic_mode)
+        synchronize();
 }
 
 bool compile(const char* source, Chunk* chunk)
