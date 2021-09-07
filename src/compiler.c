@@ -56,7 +56,7 @@ static void expression();
 static void statement();
 static void declaration();
 
-static uint8_t identifier_constant(Token* name);
+static uint8_t identifier_constant(const Token* name);
 
 static Chunk* current_chunk()
 {
@@ -166,25 +166,25 @@ static void end_compiler()
 #endif
 }
 
-static void grouping(const bool can_assign)
+static void grouping(__attribute__((unused)) const bool can_assign)
 {
     expression();
     consume(TokenRightParen, "Expect ')' after expression.");
 }
 
-static void number(const bool can_assign)
+static void number(__attribute__((unused)) const bool can_assign)
 {
     const double value = strtod(parser.previous.start, NULL);
     emit_constant(NUMBER_VAL(value));
 }
 
-static void string(const bool can_assign)
+static void string(__attribute__((unused)) const bool can_assign)
 {
     emit_constant(OBJ_VAL(copy_string(parser.previous.start + 1,
                                       parser.previous.length - 2)));
 }
 
-static void named_variable(Token name, const bool can_assign)
+static void named_variable(const Token name, const bool can_assign)
 {
     uint8_t arg = identifier_constant(&name);
 
@@ -202,7 +202,7 @@ static void variable(const bool can_assign)
     named_variable(parser.previous, can_assign);
 }
 
-static void unary(const bool can_assign)
+static void unary(__attribute__((unused)) const bool can_assign)
 {
     const TokenType op_type = parser.previous.type;
 
@@ -221,7 +221,7 @@ static void unary(const bool can_assign)
     }
 }
 
-static void binary(const bool can_assign)
+static void binary(__attribute__((unused)) const bool can_assign)
 {
     const TokenType  op_type = parser.previous.type;
     const ParseRule* rule    = get_rule(op_type);
@@ -266,7 +266,7 @@ static void binary(const bool can_assign)
     }
 }
 
-static void literal(const bool can_assign)
+static void literal(__attribute__((unused)) const bool can_assign)
 {
     switch (parser.previous.type)
     {
@@ -357,7 +357,7 @@ static void parse_precedence(const Precedence prec)
         error("Invalid assignment target.");
 }
 
-static uint8_t identifier_constant(Token* name)
+static uint8_t identifier_constant(const Token* name)
 {
     return make_constant(OBJ_VAL(copy_string(name->start, name->length)));
 }
