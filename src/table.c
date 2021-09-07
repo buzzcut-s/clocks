@@ -93,7 +93,7 @@ bool table_insert(Table* table, const ObjString* key, const Value value)
     return is_new_key;
 }
 
-bool table_find(const Table* table, const ObjString* key, Value* value)
+bool table_find(const Table* table, const ObjString* key, Value* out_val)
 {
     if (table->count == 0)
         return false;
@@ -102,7 +102,7 @@ bool table_find(const Table* table, const ObjString* key, Value* value)
     if (res->key == NULL)
         return false;
 
-    *value = res->value;
+    *out_val = res->value;
     return true;
 }
 
