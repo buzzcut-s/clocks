@@ -25,9 +25,10 @@ void print_object(const Value* value);
 
 typedef struct ObjString
 {
-    Obj   obj;
-    int   length;
-    char* chars;
+    Obj      obj;
+    int      length;
+    char*    chars;
+    uint32_t hash;
 } ObjString;
 
 #define IS_STRING(value)  is_obj_type(value, ObjTypeString)

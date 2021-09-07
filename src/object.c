@@ -20,12 +20,27 @@ static Obj* allocate_obj(const size_t size, const ObjType type)
     return object;
 }
 
-static ObjString* allocate_string(char* chars, const int length)
+static ObjString* allocate_string(char* chars, const int length, uint32_t hash)
 {
     ObjString* string = ALLOCATE_OBJ(ObjString, ObjTypeString);
     string->length    = length;
     string->chars     = chars;
+    string->hash      = hash;
     return string;
+}
+
+static uint32_t hash_string(const char* key, int length)
+{
+    const uint32_t fnv_offset_basis = 2166136261U;
+    const uint32_t fnv_prime        = 16777619U;
+
+    uint32_t hash = fnv_offset_basis;
+    for (int i = 0; i < length; i++)
+    {
+        hash ^= (uint8_t)key[i];
+        hash *= fnv_prime;
+    }
+    return hash;
 }
 
 void print_object(const Value* value)
@@ -40,13 +55,17 @@ void print_object(const Value* value)
 
 ObjString* take_string(char* chars, const int length)
 {
-    return allocate_string(chars, length);
+    uint32_t hash = hash_string(chars, length);
+    return allocate_string(chars, length, hash);
 }
 
 ObjString* copy_string(const char* chars, int length)
 {
+    uint32_t hash = hash_string(chars, length);
+
     char* heap_chars = ALLOCATE(char, length + 1);
     memcpy(heap_chars, chars, length);
     heap_chars[length] = '\0';
-    return allocate_string(heap_chars, length);
+
+    return allocate_string(heap_chars, length, hash);
 }
