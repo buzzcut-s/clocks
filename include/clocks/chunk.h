@@ -13,6 +13,7 @@ typedef enum
     OpPop,
     OpReadGlobal,
     OpDefineGlobal,
+    OpAssignGlobal,
     OpEqual,
     OpGreater,
     OpLess,

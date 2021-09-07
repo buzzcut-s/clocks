@@ -36,7 +36,7 @@ typedef enum
     PrecPrimary
 } Precedence;
 
-typedef void (*ParseFn)();
+typedef void (*ParseFn)(const bool can_assign);
 
 typedef struct
 {
@@ -166,36 +166,43 @@ static void end_compiler()
 #endif
 }
 
-static void grouping()
+static void grouping(const bool can_assign)
 {
     expression();
     consume(TokenRightParen, "Expect ')' after expression.");
 }
 
-static void number()
+static void number(const bool can_assign)
 {
     const double value = strtod(parser.previous.start, NULL);
     emit_constant(NUMBER_VAL(value));
 }
 
-static void string()
+static void string(const bool can_assign)
 {
     emit_constant(OBJ_VAL(copy_string(parser.previous.start + 1,
                                       parser.previous.length - 2)));
 }
 
-static void named_variable(Token name)
+static void named_variable(Token name, const bool can_assign)
 {
     uint8_t arg = identifier_constant(&name);
-    emit_bytes(OpReadGlobal, arg);
+
+    if (can_assign && match(TokenEqual))
+    {
+        expression();
+        emit_bytes(OpAssignGlobal, arg);
+    }
+    else
+        emit_bytes(OpReadGlobal, arg);
 }
 
-static void variable()
+static void variable(const bool can_assign)
 {
-    named_variable(parser.previous);
+    named_variable(parser.previous, can_assign);
 }
 
-static void unary()
+static void unary(const bool can_assign)
 {
     const TokenType op_type = parser.previous.type;
 
@@ -214,7 +221,7 @@ static void unary()
     }
 }
 
-static void binary()
+static void binary(const bool can_assign)
 {
     const TokenType  op_type = parser.previous.type;
     const ParseRule* rule    = get_rule(op_type);
@@ -259,7 +266,7 @@ static void binary()
     }
 }
 
-static void literal()
+static void literal(const bool can_assign)
 {
     switch (parser.previous.type)
     {
@@ -336,14 +343,18 @@ static void parse_precedence(const Precedence prec)
         return;
     }
 
-    prefix_rule();
+    const bool can_assign = prec <= PrecAssignment;
+    prefix_rule(can_assign);
 
     while (prec <= get_rule(parser.current.type)->prec)
     {
         advance();
         const ParseFn infix_rule = get_rule(parser.previous.type)->infix;
-        infix_rule();
+        infix_rule(can_assign);
     }
+
+    if (can_assign && match(TokenEqual))
+        error("Invalid assignment target.");
 }
 
 static uint8_t identifier_constant(Token* name)

@@ -168,6 +168,17 @@ static InterpretResult run()
                 pop();
                 break;
             }
+            case OpAssignGlobal:
+            {
+                ObjString* name = READ_STRING();
+                if (table_insert(&vm.globals, name, peek(0)))
+                {
+                    table_remove(&vm.globals, name);
+                    runtime_error("Undefined variable '%s'.", name->chars);
+                    return InterpretRuntimeError;
+                }
+                break;
+            }
 
             case OpEqual:
             {

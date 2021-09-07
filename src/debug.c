@@ -61,6 +61,8 @@ int disassemble_instruction(const Chunk* chunk, const int offset)
             return constant_instruction("OpReadGlobal", chunk, offset);
         case OpDefineGlobal:
             return constant_instruction("OpDefineGlobal", chunk, offset);
+        case OpAssignGlobal:
+            return constant_instruction("OpAssignGlobal", chunk, offset);
 
         case OpEqual:
             return simple_instruction("OpEqual", offset);
