@@ -26,4 +26,7 @@ bool table_remove(Table* table, const ObjString* key);
 
 void table_copy(const Table* src, Table* dest);
 
+ObjString* table_find_string(const Table* table, const char* chars,
+                             int length, uint32_t hash);
+
 #endif  // TABLE_H

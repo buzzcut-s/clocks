@@ -10,6 +10,7 @@
 #include <clocks/debug.h>
 #include <clocks/memory.h>
 #include <clocks/object.h>
+#include <clocks/table.h>
 #include <clocks/value.h>
 
 VM vm;
@@ -36,11 +37,13 @@ static void runtime_error(const char* format, ...)
 void init_vm()
 {
     reset_stack();
+    init_table(&vm.strings);
     vm.obj_head = NULL;
 }
 
 void free_vm()
 {
+    free_table(&vm.strings);
     free_objects();
 }
 

@@ -20,12 +20,8 @@ bool values_equal(const Value a, const Value b)
         case ValNumber:
             return AS_NUMBER(a) == AS_NUMBER(b);
         case ValObj:
-        {
-            const ObjString* a_str = AS_STRING(a);
-            const ObjString* b_str = AS_STRING(b);
-            return a_str->length == b_str->length
-                   && memcmp(a_str->chars, b_str->chars, a_str->length) == 0;
-        }
+            return AS_OBJ(a) == AS_OBJ(b);
+
         default:
             return false;
     }

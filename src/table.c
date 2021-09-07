@@ -1,5 +1,7 @@
 #include "clocks/table.h"
 
+#include <string.h>
+
 #include <clocks/memory.h>
 #include <clocks/object.h>
 
@@ -127,5 +129,31 @@ void table_copy(const Table* src, Table* dest)
         const Entry* entry = &src->entries[i];
         if (entry->key != NULL)
             table_insert(dest, entry->key, entry->value);
+    }
+}
+
+ObjString* table_find_string(const Table* table, const char* chars,
+                             const int length, const uint32_t hash)
+{
+    if (table->count == 0)
+        return NULL;
+
+    uint32_t index = hash % table->capacity;
+    while (true)
+    {
+        Entry* entry = &table->entries[index];
+
+        const bool empty_entry   = (entry->key == NULL);
+        const bool not_tombstone = IS_NIL(entry->value);
+        if (empty_entry && not_tombstone)
+            return NULL;
+
+        if (entry->key->length == length && entry->key->hash == hash
+            && memcmp(entry->key->chars, chars, length) == 0)
+        {
+            return entry->key;
+        }
+
+        index = (index + 1) % table->capacity;
     }
 }
