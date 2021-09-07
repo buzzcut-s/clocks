@@ -45,8 +45,22 @@ typedef struct
     const Precedence prec;
 } ParseRule;
 
-Parser parser;
-Chunk* compiling_chunk;
+typedef struct
+{
+    Token name;
+    int   depth;
+} Local;
+
+typedef struct
+{
+    Local locals[UINT8_COUNT];
+    int   local_count;
+    int   scope_depth;
+} Compiler;
+
+Parser    parser;
+Compiler* current = NULL;
+Chunk*    compiling_chunk;
 
 static const ParseRule* get_rule(TokenType type);
 
@@ -157,6 +171,13 @@ static void emit_constant(const Value value)
     emit_bytes(OpConstant, make_constant(value));
 }
 
+static void init_compiler(Compiler* compiler)
+{
+    compiler->local_count = 0;
+    compiler->scope_depth = 0;
+    current               = compiler;
+}
+
 static void end_compiler()
 {
     emit_return();
@@ -164,6 +185,16 @@ static void end_compiler()
     if (!parser.had_error)
         disassemble_chunk(current_chunk(), "code");
 #endif
+}
+
+static void begin_scope()
+{
+    current->scope_depth++;
+}
+
+static void end_scope()
+{
+    current->scope_depth--;
 }
 
 static void grouping(__attribute__((unused)) const bool can_assign)
@@ -378,6 +409,13 @@ static void expression()
     parse_precedence(PrecAssignment);
 }
 
+static void block()
+{
+    while (!check(TokenRightBrace) && !check(TokenEOF))
+        declaration();
+    consume(TokenRightBrace, "Expect '}' after block.");
+}
+
 static void var_declaration()
 {
     uint8_t global = parse_variable("Expect variable name.");
@@ -409,6 +447,12 @@ static void statement()
 {
     if (match(TokenPrint))
         print_statement();
+    else if (match(TokenLeftBrace))
+    {
+        begin_scope();
+        block();
+        end_scope();
+    }
     else
         expression_statement();
 }
@@ -452,6 +496,8 @@ static void declaration()
 bool compile(const char* source, Chunk* chunk)
 {
     init_scanner(source);
+    Compiler compiler;
+    init_compiler(&compiler);
     compiling_chunk   = chunk;
     parser.had_error  = false;
     parser.panic_mode = false;
