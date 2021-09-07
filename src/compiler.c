@@ -333,9 +333,38 @@ static void parse_precedence(const Precedence prec)
     }
 }
 
+static uint8_t identifier_constant(Token* name)
+{
+    return make_constant(OBJ_VAL(copy_string(name->start, name->length)));
+}
+
+static uint8_t parse_variable(const char* message)
+{
+    consume(TokenIdentifier, message);
+    return identifier_constant(&parser.previous);
+}
+
+static void define_variable(uint8_t global)
+{
+    emit_bytes(OpDefineGlobal, global);
+}
+
 static void expression()
 {
     parse_precedence(PrecAssignment);
+}
+
+static void var_declaration()
+{
+    uint8_t global = parse_variable("Expect variable name.");
+
+    if (match(TokenEqual))
+        expression();
+    else
+        emit_byte(OpNil);
+    consume(TokenSemicolon, "Expect ';' after value.");
+
+    define_variable(global);
 }
 
 static void print_statement()
@@ -387,7 +416,11 @@ static void synchronize()
 
 static void declaration()
 {
-    statement();
+    if (match(TokenVar))
+        var_declaration();
+    else
+        statement();
+
     if (parser.panic_mode)
         synchronize();
 }

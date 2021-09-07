@@ -11,6 +11,7 @@ typedef enum
     OpTrue,
     OpFalse,
     OpPop,
+    OpDefineGlobal,
     OpEqual,
     OpGreater,
     OpLess,
