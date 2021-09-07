@@ -76,6 +76,19 @@ bool table_insert(Table* table, const ObjString* key, const Value value)
     return is_new_key;
 }
 
+bool table_find(const Table* table, const ObjString* key, Value* value)
+{
+    if (table->count == 0)
+        return false;
+
+    const Entry* res = find_entry(table->entries, table->capacity, key);
+    if (res->key == NULL)
+        return false;
+
+    *value = res->value;
+    return true;
+}
+
 void table_copy(const Table* src, Table* dest)
 {
     for (int i = 0; i < src->capacity; i++)
