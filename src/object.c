@@ -43,16 +43,6 @@ static uint32_t hash_string(const char* key, int length)
     return hash;
 }
 
-void print_object(const Value* value)
-{
-    switch (OBJ_TYPE(*value))
-    {
-        case ObjTypeString:
-            printf("%s", AS_CSTRING(*value));
-            break;
-    }
-}
-
 ObjString* take_string(char* chars, const int length)
 {
     uint32_t hash = hash_string(chars, length);
@@ -68,4 +58,14 @@ ObjString* copy_string(const char* chars, int length)
     heap_chars[length] = '\0';
 
     return allocate_string(heap_chars, length, hash);
+}
+
+void print_object(const Value* value)
+{
+    switch (OBJ_TYPE(*value))
+    {
+        case ObjTypeString:
+            printf("%s", AS_CSTRING(*value));
+            break;
+    }
 }
