@@ -234,7 +234,7 @@ Token scan_token()
 
     scanner.start = scanner.current;
     if (is_at_end())
-        return make_token(TokenEof);
+        return make_token(TokenEOF);
 
     const char c = advance();
 

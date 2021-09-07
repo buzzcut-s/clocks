@@ -21,7 +21,7 @@ typedef enum {
     TokenPrint, TokenReturn, TokenSuper, TokenThis,
     TokenTrue, TokenVar, TokenWhile,
 
-    TokenError, TokenEof
+    TokenError, TokenEOF
 } TokenType;
 // clang-format on
 

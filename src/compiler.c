@@ -72,7 +72,7 @@ static void error_at(const Token* token, const char* message)
 
     fprintf(stderr, "[line %d] Error", token->line);
 
-    if (token->type == TokenEof)
+    if (token->type == TokenEOF)
         fprintf(stderr, " at end");
     else if (token->type == TokenError)
     {}
@@ -317,7 +317,7 @@ const ParseRule RULES[] = {
   [TokenVar]          = {NULL, NULL, PrecNone},
   [TokenWhile]        = {NULL, NULL, PrecNone},
   [TokenError]        = {NULL, NULL, PrecNone},
-  [TokenEof]          = {NULL, NULL, PrecNone},
+  [TokenEOF]          = {NULL, NULL, PrecNone},
 };
 
 static const ParseRule* get_rule(const TokenType type)
@@ -405,7 +405,7 @@ static void statement()
 static void synchronize()
 {
     parser.panic_mode = false;
-    while (parser.current.type != TokenEof)
+    while (parser.current.type != TokenEOF)
     {
         if (parser.previous.type == TokenSemicolon)
             return;
@@ -447,7 +447,7 @@ bool compile(const char* source, Chunk* chunk)
 
     advance();
 
-    while (!match(TokenEof))
+    while (!match(TokenEOF))
         declaration();
 
     end_compiler();
