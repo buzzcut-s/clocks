@@ -11,6 +11,8 @@ typedef enum
     OpTrue,
     OpFalse,
     OpPop,
+    OpReadLocal,
+    OpAssignLocal,
     OpReadGlobal,
     OpDefineGlobal,
     OpAssignGlobal,

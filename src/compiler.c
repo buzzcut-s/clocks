@@ -72,6 +72,7 @@ static void statement();
 static void declaration();
 
 static uint8_t identifier_constant(const Token* name);
+static int     resolve_local(const Compiler* compiler, const Token* name);
 
 static Chunk* current_chunk()
 {
@@ -224,15 +225,29 @@ static void string(__attribute__((unused)) const bool can_assign)
 
 static void named_variable(const Token name, const bool can_assign)
 {
-    const uint8_t arg = identifier_constant(&name);
+    uint8_t read_op;
+    uint8_t assign_op;
+
+    int arg = resolve_local(current, &name);
+    if (arg == -1)
+    {
+        arg       = identifier_constant(&name);
+        read_op   = OpReadGlobal;
+        assign_op = OpAssignGlobal;
+    }
+    else
+    {
+        read_op   = OpReadLocal;
+        assign_op = OpAssignLocal;
+    }
 
     if (can_assign && match(TokenEqual))
     {
         expression();
-        emit_bytes(OpAssignGlobal, arg);
+        emit_bytes(assign_op, arg);
     }
     else
-        emit_bytes(OpReadGlobal, arg);
+        emit_bytes(read_op, arg);
 }
 
 static void variable(const bool can_assign)
@@ -404,6 +419,17 @@ static bool identifiers_equal(const Token* a, const Token* b)
 {
     return (a->length != b->length) ? false
                                     : memcmp(a->start, b->start, a->length) == 0;
+}
+
+static int resolve_local(const Compiler* compiler, const Token* name)
+{
+    for (int i = compiler->local_count - 1; i >= 0; i--)
+    {
+        const Local* local = &compiler->locals[i];
+        if (identifiers_equal(name, &local->name))
+            return i;
+    }
+    return -1;
 }
 
 static void add_local(const Token name)
