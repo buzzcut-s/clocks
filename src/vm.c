@@ -144,6 +144,18 @@ static InterpretResult run()
                 pop();
                 break;
 
+            case OpReadGlobal:
+            {
+                ObjString* name = READ_STRING();
+
+                Value value;
+                if (!table_find(&vm.globals, name, &value))
+                {
+                    runtime_error("Undefined variable '%s'.", name->chars);
+                }
+                push(value);
+                break;
+            }
             case OpDefineGlobal:
             {
                 ObjString* name = READ_STRING();

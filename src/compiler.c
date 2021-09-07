@@ -56,6 +56,8 @@ static void expression();
 static void statement();
 static void declaration();
 
+static uint8_t identifier_constant(Token* name);
+
 static Chunk* current_chunk()
 {
     return compiling_chunk;
@@ -182,6 +184,17 @@ static void string()
                                       parser.previous.length - 2)));
 }
 
+static void named_variable(Token name)
+{
+    uint8_t arg = identifier_constant(&name);
+    emit_bytes(OpReadGlobal, arg);
+}
+
+static void variable()
+{
+    named_variable(parser.previous);
+}
+
 static void unary()
 {
     const TokenType op_type = parser.previous.type;
@@ -284,7 +297,7 @@ const ParseRule RULES[] = {
   [TokenGreaterEqual] = {NULL, binary, PrecComparison},
   [TokenLess]         = {NULL, binary, PrecComparison},
   [TokenLessEqual]    = {NULL, binary, PrecComparison},
-  [TokenIdentifier]   = {NULL, NULL, PrecNone},
+  [TokenIdentifier]   = {variable, NULL, PrecNone},
   [TokenString]       = {string, NULL, PrecNone},
   [TokenNumber]       = {number, NULL, PrecNone},
   [TokenAnd]          = {NULL, NULL, PrecNone},

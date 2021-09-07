@@ -57,6 +57,8 @@ int disassemble_instruction(const Chunk* chunk, const int offset)
         case OpPop:
             return simple_instruction("OpPop", offset);
 
+        case OpReadGlobal:
+            return constant_instruction("OpReadGlobal", chunk, offset);
         case OpDefineGlobal:
             return constant_instruction("OpDefineGlobal", chunk, offset);
 
