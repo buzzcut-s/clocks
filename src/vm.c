@@ -105,6 +105,10 @@ static InterpretResult run()
     }                                                   \
     while (false)
 
+#ifdef DEBUG_TRACE_EXECUTION
+    printf("== execution trace ==");
+#endif
+
     while (true)
     {
 #ifdef DEBUG_TRACE_EXECUTION
