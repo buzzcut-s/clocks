@@ -156,6 +156,7 @@ static InterpretResult run()
                 if (!table_find(&vm.globals, name, &value))
                 {
                     runtime_error("Undefined variable '%s'.", name->chars);
+                    return InterpretRuntimeError;
                 }
                 push(value);
                 break;
