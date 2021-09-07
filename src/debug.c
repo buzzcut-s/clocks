@@ -47,9 +47,6 @@ int disassemble_instruction(const Chunk* chunk, const int offset)
         case OpConstant:
             return constant_instruction("OpConstant", chunk, offset);
 
-        case OpReturn:
-            return simple_instruction("OpReturn", offset);
-
         case OpNil:
             return simple_instruction("OpNil", offset);
         case OpTrue:
@@ -78,6 +75,9 @@ int disassemble_instruction(const Chunk* chunk, const int offset)
 
         case OpNegate:
             return simple_instruction("OpNegate", offset);
+
+        case OpReturn:
+            return simple_instruction("OpReturn", offset);
 
         default:
             printf("Unknown opcode %d\n", instruction);
