@@ -19,6 +19,7 @@ typedef enum
     OpDivide,
     OpNot,
     OpNegate,
+    OpPrint,
     OpReturn,
 } OpCode;
 

@@ -187,9 +187,12 @@ static InterpretResult run()
                 push(NUMBER_VAL(-AS_NUMBER(pop())));
                 break;
 
-            case OpReturn:
+            case OpPrint:
                 print_value(pop());
                 printf("\n");
+                break;
+
+            case OpReturn:
                 return InterpretOk;
         }
     }

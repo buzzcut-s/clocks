@@ -76,6 +76,9 @@ int disassemble_instruction(const Chunk* chunk, const int offset)
         case OpNegate:
             return simple_instruction("OpNegate", offset);
 
+        case OpPrint:
+            return simple_instruction("OpPrint", offset);
+
         case OpReturn:
             return simple_instruction("OpReturn", offset);
 

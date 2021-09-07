@@ -53,6 +53,8 @@ static const ParseRule* get_rule(TokenType type);
 static void parse_precedence(Precedence prec);
 
 static void expression();
+static void statement();
+static void declaration();
 
 static Chunk* current_chunk()
 {
@@ -91,7 +93,6 @@ static void error_at_current(const char* message)
 static void advance()
 {
     parser.previous = parser.current;
-
     while (true)
     {
         parser.current = scan_token();
@@ -107,6 +108,19 @@ static void consume(const TokenType type, const char* message)
         advance();
     else
         error_at_current(message);
+}
+
+static bool check(TokenType type)
+{
+    return parser.current.type == type;
+}
+
+static bool match(TokenType type)
+{
+    if (!check(type))
+        return false;
+    advance();
+    return true;
 }
 
 static void emit_byte(const uint8_t byte)
@@ -324,6 +338,24 @@ static void expression()
     parse_precedence(PrecAssignment);
 }
 
+static void print_statement()
+{
+    expression();
+    consume(TokenSemicolon, "Expect ';' after value.");
+    emit_byte(OpPrint);
+}
+
+static void statement()
+{
+    if (match(TokenPrint))
+        print_statement();
+}
+
+static void declaration()
+{
+    statement();
+}
+
 bool compile(const char* source, Chunk* chunk)
 {
     init_scanner(source);
@@ -332,9 +364,10 @@ bool compile(const char* source, Chunk* chunk)
     parser.panic_mode = false;
 
     advance();
-    expression();
 
-    consume(TokenEof, "Expect end of expression.");
+    while (!match(TokenEof))
+        declaration();
+
     end_compiler();
     return !parser.had_error;
 }
