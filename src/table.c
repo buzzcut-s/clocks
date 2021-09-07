@@ -69,7 +69,7 @@ static void adjust_capacity(Table* table, const int capacity)
     table->capacity = capacity;
 }
 
-bool table_insert(Table* table, const ObjString* key, const Value value)
+bool table_insert(Table* table, ObjString* key, const Value value)
 {
     if (table->count + 1 > table->capacity * TABLE_MAX_LOAD)
     {

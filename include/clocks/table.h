@@ -6,8 +6,8 @@
 
 typedef struct
 {
-    const ObjString* key;
-    Value            value;
+    ObjString* key;
+    Value      value;
 } Entry;
 
 typedef struct
@@ -20,7 +20,7 @@ typedef struct
 void init_table(Table* table);
 void free_table(Table* table);
 
-bool table_insert(Table* table, const ObjString* key, Value value);
+bool table_insert(Table* table, ObjString* key, Value value);
 bool table_find(const Table* table, const ObjString* key, Value* out_val);
 bool table_remove(Table* table, const ObjString* key);
 
