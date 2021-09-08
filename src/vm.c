@@ -135,8 +135,6 @@ static InterpretResult run()
             {
                 const Value constant = READ_CONSTANT();
                 push(constant);
-                print_value(constant);
-                printf("\n");
                 break;
             }
 
