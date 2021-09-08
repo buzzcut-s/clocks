@@ -152,7 +152,7 @@ static void emit_bytes(const uint8_t byte1, const uint8_t byte2)
     emit_byte(byte2);
 }
 
-static int emit_jump(uint8_t instruction)
+static int emit_jump(const uint8_t instruction)
 {
     emit_byte(instruction);
     emit_byte(0xff);
@@ -164,7 +164,7 @@ static void emit_loop(const int loop_start)
 {
     emit_byte(OpLoop);
 
-    int offset = current_chunk()->count - loop_start + 2;
+    const int offset = current_chunk()->count - loop_start + 2;
     if (offset > UINT16_MAX)
         error("Loop body too large.");
 
@@ -193,9 +193,9 @@ static void emit_constant(const Value value)
     emit_bytes(OpConstant, make_constant(value));
 }
 
-static void patch_jump(int offset)
+static void patch_jump(const int offset)
 {
-    int jump = current_chunk()->count - offset - 2;
+    const int jump = current_chunk()->count - offset - 2;
     if (jump > UINT16_MAX)
         error("Too much code to jump over.");
 
@@ -255,8 +255,8 @@ static void string(__attribute__((unused)) const bool can_assign)
 
 static void named_variable(const Token name, const bool can_assign)
 {
-    uint8_t read_op;
-    uint8_t assign_op;
+    uint8_t read_op   = 0;
+    uint8_t assign_op = 0;
 
     int arg = resolve_local(current, &name);
     if (arg == -1)
@@ -377,8 +377,8 @@ static void and_fn(__attribute__((unused)) const bool can_assign)
 
 static void or_fn(__attribute__((unused)) const bool can_assign)
 {
-    int else_jump = emit_jump(OpJumpIfFalse);
-    int end_jump  = emit_jump(OpJump);
+    const int else_jump = emit_jump(OpJumpIfFalse);
+    const int end_jump  = emit_jump(OpJump);
 
     patch_jump(else_jump);
     emit_byte(OpPop);
@@ -507,7 +507,7 @@ static void declare_variable()
     const Token* name = &parser.previous;
     for (int i = current->local_count - 1; i >= 0; i--)
     {
-        Local* local = &current->locals[i];
+        const Local* local = &current->locals[i];
         if (local->depth != -1 && local->depth < current->scope_depth)
             break;
         if (identifiers_equal(name, &local->name))
@@ -533,7 +533,7 @@ static void mark_initialized()
     current->locals[current->local_count - 1].depth = current->scope_depth;
 }
 
-static void define_variable(uint8_t global)
+static void define_variable(const uint8_t global)
 {
     if (current->scope_depth > 0)
     {
@@ -588,12 +588,12 @@ static void if_statement()
     expression();
     consume(TokenRightParen, "Expect ')' after condition.");
 
-    int then_jump = emit_jump(OpJumpIfFalse);
+    const int then_jump = emit_jump(OpJumpIfFalse);
     emit_byte(OpPop);
 
     statement();
 
-    int else_jump = emit_jump(OpJump);
+    const int else_jump = emit_jump(OpJump);
     patch_jump(then_jump);
     emit_byte(OpPop);
 
@@ -605,12 +605,12 @@ static void if_statement()
 
 static void while_statement()
 {
-    int loop_start = current_chunk()->count;
+    const int loop_start = current_chunk()->count;
     consume(TokenLeftParen, "Expect '(' after 'while'.");
     expression();
     consume(TokenRightParen, "Expect ')' after condition.");
 
-    int exit_jump = emit_jump(OpJumpIfFalse);
+    const int exit_jump = emit_jump(OpJumpIfFalse);
     emit_byte(OpPop);
 
     statement();

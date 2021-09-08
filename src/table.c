@@ -141,7 +141,7 @@ ObjString* table_find_string(const Table* table, const char* chars,
     uint32_t index = hash % table->capacity;
     while (true)
     {
-        Entry* entry = &table->entries[index];
+        const Entry* entry = &table->entries[index];
 
         const bool empty_entry   = (entry->key == NULL);
         const bool not_tombstone = IS_NIL(entry->value);

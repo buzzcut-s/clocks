@@ -125,7 +125,7 @@ static void skip_whitespace()
 }
 
 static TokenType check_keyword(const size_t start, const size_t length,
-                               const char* rest, TokenType type)
+                               const char* rest, const TokenType type)
 {
     if (token_length() == start + length
         && memcmp(scanner.start + start, rest, length) == 0)
