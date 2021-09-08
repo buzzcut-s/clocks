@@ -152,6 +152,14 @@ static void emit_bytes(const uint8_t byte1, const uint8_t byte2)
     emit_byte(byte2);
 }
 
+static int emit_jump(uint8_t instruction)
+{
+    emit_byte(instruction);
+    emit_byte(0xff);
+    emit_byte(0xff);
+    return current_chunk()->count - 2;
+}
+
 static void emit_return()
 {
     emit_byte(OpReturn);
@@ -171,6 +179,16 @@ static uint8_t make_constant(const Value value)
 static void emit_constant(const Value value)
 {
     emit_bytes(OpConstant, make_constant(value));
+}
+
+static void patch_jump(int offset)
+{
+    int jump = current_chunk()->count - offset - 2;
+    if (jump > UINT16_MAX)
+        error("Too much code to jump over.");
+
+    current_chunk()->code[offset]     = (jump >> 8) & 0xff;
+    current_chunk()->code[offset + 1] = (jump & 0xff);
 }
 
 static void init_compiler(Compiler* compiler)
@@ -532,6 +550,27 @@ static void expression_statement()
     emit_byte(OpPop);
 }
 
+static void if_statement()
+{
+    consume(TokenLeftParen, "Expect '(' after if.");
+    expression();
+    consume(TokenRightParen, "Expect ')' after condition.");
+
+    int then_jump = emit_jump(OpJumpIfFalse);
+    emit_byte(OpPop);
+    statement();
+
+    int else_jump = emit_jump(OpJump);
+
+    patch_jump(then_jump);
+    emit_byte(OpPop);
+
+    if (match(TokenElse))
+        statement();
+
+    patch_jump(else_jump);
+}
+
 static void statement()
 {
     if (match(TokenPrint))
@@ -542,6 +581,8 @@ static void statement()
         block();
         end_scope();
     }
+    else if (match(TokenIf))
+        if_statement();
     else
         expression_statement();
 }

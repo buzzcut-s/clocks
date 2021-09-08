@@ -26,6 +26,8 @@ typedef enum
     OpNot,
     OpNegate,
     OpPrint,
+    OpJump,
+    OpJumpIfFalse,
     OpReturn,
 } OpCode;
 
