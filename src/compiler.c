@@ -214,13 +214,19 @@ static void patch_jump(const int offset)
 
 static void init_compiler(Compiler* compiler, const FunctionType type)
 {
-    compiler->enclosing   = NULL;
+    compiler->enclosing   = current;
     compiler->func        = NULL;
     compiler->type        = type;
     compiler->local_count = 0;
     compiler->scope_depth = 0;
     compiler->func        = new_function();
-    current               = compiler;
+
+    current = compiler;
+    if (type != FuncTypeScript)
+    {
+        current->func->name = copy_string(parser.previous.start,
+                                          parser.previous.length);
+    }
 
     Local* local       = &current->locals[current->local_count++];
     local->depth       = 0;
@@ -600,6 +606,18 @@ static void function(const FunctionType type)
 
     begin_scope();
     consume(TokenLeftParen, "Expect '(' after function name.");
+    if (!check(TokenRightParen))
+    {
+        do {
+            current->func->arity++;
+            if (current->func->arity > 255)
+                error_at_current("Can't have more than 255 parameters");
+
+            const uint8_t param = parse_variable("Expect parameter name");
+            define_variable(param);
+        }
+        while (match(TokenComma));
+    }
     consume(TokenRightParen, "Expect ')' after function name.");
     consume(TokenLeftBrace, "Expect '{' after function name.");
     block();
