@@ -363,6 +363,18 @@ static void and_fn(__attribute__((unused)) const bool can_assign)
     patch_jump(end_jump);
 }
 
+static void or_fn(__attribute__((unused)) const bool can_assign)
+{
+    int else_jump = emit_jump(OpJumpIfFalse);
+    int end_jump  = emit_jump(OpJump);
+
+    patch_jump(else_jump);
+    emit_byte(OpPop);
+
+    parse_precedence(PrecOr);
+    patch_jump(end_jump);
+}
+
 const ParseRule RULES[] = {
   [TokenLeftParen]    = {grouping, NULL, PrecNone},
   [TokenRightParen]   = {NULL, NULL, PrecNone},
@@ -394,7 +406,7 @@ const ParseRule RULES[] = {
   [TokenFun]          = {NULL, NULL, PrecNone},
   [TokenIf]           = {NULL, NULL, PrecNone},
   [TokenNil]          = {literal, NULL, PrecNone},
-  [TokenOr]           = {NULL, NULL, PrecNone},
+  [TokenOr]           = {NULL, or_fn, PrecNone},
   [TokenPrint]        = {NULL, NULL, PrecNone},
   [TokenReturn]       = {NULL, NULL, PrecNone},
   [TokenSuper]        = {NULL, NULL, PrecNone},
