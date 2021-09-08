@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <clocks/chunk.h>
 #include <clocks/memory.h>
 #include <clocks/table.h>
 #include <clocks/vm.h>
@@ -74,12 +75,29 @@ ObjString* copy_string(const char* chars, int length)
     return allocate_string(heap_chars, length, hash);
 }
 
+static void print_function(ObjFunction* func)
+{
+    printf("<fn %s>", func->name->chars);
+}
+
+ObjFunction* new_function()
+{
+    ObjFunction* func = ALLOCATE_OBJ(ObjFunction, ObjTypeFunction);
+    func->arity       = 0;
+    func->name        = NULL;
+    init_chunk(&func->chunk);
+    return func;
+}
+
 void print_object(const Value* value)
 {
     switch (OBJ_TYPE(*value))
     {
         case ObjTypeString:
             printf("%s", AS_CSTRING(*value));
+            break;
+        case ObjTypeFunction:
+            print_function(AS_FUNCTION(*value));
             break;
     }
 }

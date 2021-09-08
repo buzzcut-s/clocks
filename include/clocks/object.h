@@ -1,11 +1,13 @@
 #ifndef OBJECT_H
 #define OBJECT_H
 
+#include "chunk.h"
 #include "value.h"
 
 typedef enum
 {
     ObjTypeString,
+    ObjTypeFunction,
 } ObjType;
 
 struct Obj
@@ -37,5 +39,18 @@ typedef struct ObjString
 
 ObjString* take_string(char* chars, int length);
 ObjString* copy_string(const char* chars, int length);
+
+typedef struct
+{
+    Obj        obj;
+    int        arity;
+    Chunk      chunk;
+    ObjString* name;
+} ObjFunction;
+
+ObjFunction* new_function();
+
+#define IS_FUNCTION(value) is_obj_type(value, ObjTypeFunction)
+#define AS_FUNCTION(value) ((ObjFunction*)AS_OBJ(value))
 
 #endif  // OBJECT_H

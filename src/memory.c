@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 
+#include <clocks/chunk.h>
 #include <clocks/object.h>
 #include <clocks/vm.h>
 
@@ -29,6 +30,13 @@ static void free_object(Obj* object)
             ObjString* string = (ObjString*)object;
             FREE_ARRAY(char, string->chars, string->length + 1);
             FREE(ObjString, object);
+            break;
+        }
+        case ObjTypeFunction:
+        {
+            ObjFunction* func = (ObjFunction*)object;
+            free_chunk(&func->chunk);
+            FREE(ObjFunction, object);
             break;
         }
     }
