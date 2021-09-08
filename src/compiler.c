@@ -787,6 +787,7 @@ static void synchronize()
             {
             }
         }
+        advance();
     }
 }
 
