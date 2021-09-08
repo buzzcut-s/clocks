@@ -27,13 +27,21 @@ static void runtime_error(const char* format, ...)
     va_start(args, format);
     vfprintf(stderr, format, args);
     va_end(args);
-    fputs("\n", stderr);
+    fputs("\n== stack trace ==\n", stderr);
 
-    const CallFrame* frame = &vm.frames[vm.frame_count - 1];
+    for (int i = vm.frame_count - 1; i >= 0; i--)
+    {
+        const CallFrame*   frame = &vm.frames[i];
+        const ObjFunction* func  = frame->func;
 
-    const size_t instruction = frame->ip - frame->func->chunk.code - 1;
-    const int    line        = frame->func->chunk.lines[instruction];
-    fprintf(stderr, "[line %d] in script\n", line);
+        const size_t instruction = frame->ip - func->chunk.code - 1;
+        fprintf(stderr, "[line %d] in ", func->chunk.lines[instruction]);
+        if (func->name == NULL)
+            fprintf(stderr, "script\n");
+        else
+            fprintf(stderr, "%s()\n", func->name->chars);
+    }
+
     reset_stack();
 }
 
@@ -88,6 +96,43 @@ static void concatenate()
 
     ObjString* res = take_string(chars, length);
     push(OBJ_VAL(res));
+}
+
+static bool call(ObjFunction* func, const int arg_count)
+{
+    if (arg_count != func->arity)
+    {
+        runtime_error("Expected %d arguments but got %d.",
+                      func->arity, arg_count);
+        return false;
+    }
+    if (vm.frame_count == FRAMES_MAX)
+    {
+        runtime_error("You know it : Stack overflow.");
+        return false;
+    }
+
+    CallFrame* frame = &vm.frames[vm.frame_count++];
+    frame->func      = func;
+    frame->ip        = func->chunk.code;
+    frame->slots     = vm.stack_top - arg_count - 1;
+    return true;
+}
+
+static bool call_value(const Value callee, const int arg_count)
+{
+    if (IS_OBJ(callee))
+    {
+        switch (OBJ_TYPE(callee))
+        {
+            case ObjTypeFunction:
+                return call(AS_FUNCTION(callee), arg_count);
+            default:
+                break;
+        }
+    }
+    runtime_error("Can call only functions and classes");
+    return false;
 }
 
 static InterpretResult run()
@@ -273,6 +318,15 @@ static InterpretResult run()
                 break;
             }
 
+            case OpCall:
+            {
+                const int arg_count = READ_BYTE();
+                if (!call_value(peek(arg_count), arg_count))
+                    return InterpretRuntimeError;
+                frame = &vm.frames[vm.frame_count - 1];
+                break;
+            }
+
             case OpReturn:
                 return InterpretOk;
         }
@@ -292,11 +346,7 @@ InterpretResult interpret(const char* source)
         return InterpretCompileError;
 
     push(OBJ_VAL(compiled_top));
-
-    CallFrame* init_frame = &vm.frames[vm.frame_count++];
-    init_frame->func      = compiled_top;
-    init_frame->ip        = compiled_top->chunk.code;
-    init_frame->slots     = vm.stack;
+    call(compiled_top, 0);
 
     return run();
 }

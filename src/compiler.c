@@ -83,6 +83,8 @@ static void declaration();
 static uint8_t identifier_constant(const Token* name);
 static int     resolve_local(const Compiler* compiler, const Token* name);
 
+static uint8_t argument_list();
+
 static Chunk* current_chunk()
 {
     return &current->func->chunk;
@@ -416,8 +418,14 @@ static void or_fn(__attribute__((unused)) const bool can_assign)
     patch_jump(end_jump);
 }
 
+static void call(__attribute__((unused)) const bool can_assign)
+{
+    const uint8_t arg_count = argument_list();
+    emit_bytes(OpCall, arg_count);
+}
+
 const ParseRule RULES[] = {
-  [TokenLeftParen]    = {grouping, NULL, PrecNone},
+  [TokenLeftParen]    = {grouping, call, PrecCall},
   [TokenRightParen]   = {NULL, NULL, PrecNone},
   [TokenLeftBrace]    = {NULL, NULL, PrecNone},
   [TokenRightBrace]   = {NULL, NULL, PrecNone},
@@ -572,6 +580,24 @@ static void define_variable(const uint8_t global)
         return;
     }
     emit_bytes(OpDefineGlobal, global);
+}
+
+static uint8_t argument_list()
+{
+    uint8_t arg_count = 0;
+    if (!check(TokenRightParen))
+    {
+        do
+        {
+            expression();
+            if (arg_count == 255)
+                error("Can't have more than 255 arguments.");
+            arg_count++;
+        }
+        while (match(TokenComma));
+    }
+    consume(TokenRightParen, "Expect ')' after arguments.");
+    return arg_count;
 }
 
 static void expression()

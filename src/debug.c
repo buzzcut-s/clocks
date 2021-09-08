@@ -117,6 +117,9 @@ int disassemble_instruction(const Chunk* chunk, const int offset)
         case OpLoop:
             return jump_instruction("OpLoop", -1, chunk, offset);
 
+        case OpCall:
+            return byte_instruction("OpCall", chunk, offset);
+
         case OpReturn:
             return simple_instruction("OpReturn", offset);
 
