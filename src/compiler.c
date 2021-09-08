@@ -160,6 +160,18 @@ static int emit_jump(uint8_t instruction)
     return current_chunk()->count - 2;
 }
 
+static void emit_loop(const int loop_start)
+{
+    emit_byte(OpLoop);
+
+    int offset = current_chunk()->count - loop_start + 2;
+    if (offset > UINT16_MAX)
+        error("Loop body too large.");
+
+    emit_byte((offset >> 8) & 0xff);
+    emit_byte(offset & 0xff);
+}
+
 static void emit_return()
 {
     emit_byte(OpReturn);
@@ -572,16 +584,16 @@ static void expression_statement()
 
 static void if_statement()
 {
-    consume(TokenLeftParen, "Expect '(' after if.");
+    consume(TokenLeftParen, "Expect '(' after 'if'.");
     expression();
     consume(TokenRightParen, "Expect ')' after condition.");
 
     int then_jump = emit_jump(OpJumpIfFalse);
     emit_byte(OpPop);
+
     statement();
 
     int else_jump = emit_jump(OpJump);
-
     patch_jump(then_jump);
     emit_byte(OpPop);
 
@@ -589,6 +601,23 @@ static void if_statement()
         statement();
 
     patch_jump(else_jump);
+}
+
+static void while_statement()
+{
+    int loop_start = current_chunk()->count;
+    consume(TokenLeftParen, "Expect '(' after 'while'.");
+    expression();
+    consume(TokenRightParen, "Expect ')' after condition.");
+
+    int exit_jump = emit_jump(OpJumpIfFalse);
+    emit_byte(OpPop);
+
+    statement();
+    emit_loop(loop_start);
+
+    patch_jump(exit_jump);
+    emit_byte(OpPop);
 }
 
 static void statement()
@@ -603,6 +632,8 @@ static void statement()
     }
     else if (match(TokenIf))
         if_statement();
+    else if (match(TokenWhile))
+        while_statement();
     else
         expression_statement();
 }
