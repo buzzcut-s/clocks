@@ -594,7 +594,7 @@ static void var_declaration()
         expression();
     else
         emit_byte(OpNil);
-    consume(TokenSemicolon, "Expect ';' after value.");
+    consume(TokenSemicolon, "Expect ';' after variable declaration.");
 
     define_variable(global);
 }
@@ -644,7 +644,7 @@ static void print_statement()
 static void expression_statement()
 {
     expression();
-    consume(TokenSemicolon, "Expect ';' after value.");
+    consume(TokenSemicolon, "Expect ';' after expression.");
     emit_byte(OpPop);
 }
 
