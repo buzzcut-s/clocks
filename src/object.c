@@ -94,6 +94,13 @@ ObjFunction* new_function()
     return func;
 }
 
+ObjNative* new_native(NativeFn func)
+{
+    ObjNative* native = ALLOCATE_OBJ(ObjNative, ObjTypeNative);
+    native->func      = func;
+    return native;
+}
+
 void print_object(const Value* value)
 {
     switch (OBJ_TYPE(*value))
@@ -103,6 +110,9 @@ void print_object(const Value* value)
             break;
         case ObjTypeFunction:
             print_function(AS_FUNCTION(*value));
+            break;
+        case ObjTypeNative:
+            printf("<native fn>");
             break;
     }
 }
