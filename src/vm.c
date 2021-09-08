@@ -328,7 +328,20 @@ static InterpretResult run()
             }
 
             case OpReturn:
-                return InterpretOk;
+            {
+                const Value result = pop();
+                vm.frame_count--;
+                if (vm.frame_count == 0)
+                {
+                    pop();
+                    return InterpretOk;
+                }
+
+                vm.stack_top = frame->slots;
+                push(result);
+                frame = &vm.frames[vm.frame_count - 1];
+                break;
+            }
         }
     }
 

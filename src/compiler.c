@@ -185,6 +185,7 @@ static void emit_loop(const int loop_start)
 
 static void emit_return()
 {
+    emit_byte(OpNil);
     emit_byte(OpReturn);
 }
 
