@@ -58,13 +58,14 @@ typedef enum
     FuncTypeScript
 } FunctionType;
 
-typedef struct
+typedef struct Compiler
 {
-    ObjFunction* func;
-    FunctionType type;
-    Local        locals[UINT8_COUNT];
-    int          local_count;
-    int          scope_depth;
+    struct Compiler* enclosing;
+    ObjFunction*     func;
+    FunctionType     type;
+    Local            locals[UINT8_COUNT];
+    int              local_count;
+    int              scope_depth;
 } Compiler;
 
 Parser    parser;
@@ -213,6 +214,7 @@ static void patch_jump(const int offset)
 
 static void init_compiler(Compiler* compiler, const FunctionType type)
 {
+    compiler->enclosing   = NULL;
     compiler->func        = NULL;
     compiler->type        = type;
     compiler->local_count = 0;
@@ -236,6 +238,7 @@ static ObjFunction* end_compiler()
                                              ? func->name->chars
                                              : "<script>");
 #endif
+    current = current->enclosing;
     return func;
 }
 
@@ -550,6 +553,8 @@ static uint8_t parse_variable(const char* message)
 
 static void mark_initialized()
 {
+    if (current->scope_depth == 0)
+        return;
     current->locals[current->local_count - 1].depth = current->scope_depth;
 }
 
@@ -585,6 +590,29 @@ static void var_declaration()
         emit_byte(OpNil);
     consume(TokenSemicolon, "Expect ';' after value.");
 
+    define_variable(global);
+}
+
+static void function(const FunctionType type)
+{
+    Compiler compiler;
+    init_compiler(&compiler, type);
+
+    begin_scope();
+    consume(TokenLeftParen, "Expect '(' after function name.");
+    consume(TokenRightParen, "Expect ')' after function name.");
+    consume(TokenLeftBrace, "Expect '{' after function name.");
+    block();
+
+    ObjFunction* func = end_compiler();
+    emit_bytes(OpConstant, make_constant(OBJ_VAL(func)));
+}
+
+static void fun_declaration()
+{
+    uint8_t global = parse_variable("Expect function name");
+    mark_initialized();
+    function(FuncTypeFunction);
     define_variable(global);
 }
 
@@ -748,6 +776,8 @@ static void declaration()
 {
     if (match(TokenVar))
         var_declaration();
+    else if (match(TokenFun))
+        fun_declaration();
     else
         statement();
 
