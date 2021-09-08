@@ -772,6 +772,21 @@ static void for_statement()
     end_scope();
 }
 
+static void return_statement()
+{
+    if (current->type == FuncTypeScript)
+        error("Can't return from top level code.");
+
+    if (match(TokenSemicolon))
+        emit_return();
+    else
+    {
+        expression();
+        consume(TokenSemicolon, "Expect ';' after return value.");
+        emit_byte(OpReturn);
+    }
+}
+
 static void statement()
 {
     if (match(TokenPrint))
@@ -788,6 +803,8 @@ static void statement()
         while_statement();
     else if (match(TokenFor))
         for_statement();
+    else if (match(TokenReturn))
+        return_statement();
     else
         expression_statement();
 }
