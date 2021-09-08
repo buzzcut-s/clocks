@@ -75,8 +75,13 @@ ObjString* copy_string(const char* chars, int length)
     return allocate_string(heap_chars, length, hash);
 }
 
-static void print_function(ObjFunction* func)
+static void print_function(const ObjFunction* func)
 {
+    if (func->name == NULL)
+    {
+        printf("<script>");
+        return;
+    }
     printf("<fn %s>", func->name->chars);
 }
 

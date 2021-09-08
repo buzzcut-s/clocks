@@ -2,7 +2,8 @@
 #define COMPILER_H
 
 #include <clocks/chunk.h>
+#include <clocks/object.h>
 
-bool compile(const char* source, Chunk* chunk);
+ObjFunction* compile(const char* source);
 
 #endif  // COMPILER_H
