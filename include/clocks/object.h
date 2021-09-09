@@ -9,6 +9,7 @@ typedef enum
     ObjTypeString,
     ObjTypeFunction,
     ObjTypeNative,
+    ObjTypeClosure,
 } ObjType;
 
 struct Obj
@@ -62,9 +63,20 @@ typedef struct
     NativeFn func;
 } ObjNative;
 
-ObjNative* new_native(NativeFn func);
-
 #define IS_NATIVE(value) is_obj_type(value, ObjTypeNative)
 #define AS_NATIVE(value) (((ObjNative*)AS_OBJ(value))->func)
+
+ObjNative* new_native(NativeFn func);
+
+typedef struct
+{
+    Obj          obj;
+    ObjFunction* func;
+} ObjClosure;
+
+#define IS_CLOSURE(value) is_obj_type(value, ObjTypeClosure)
+#define AS_CLOSURE(value) ((ObjClosure*)AS_OBJ(value))
+
+ObjClosure* new_closure(ObjFunction* func);
 
 #endif  // OBJECT_H

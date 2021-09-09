@@ -650,7 +650,7 @@ static void function(const FunctionType type)
     block();
 
     ObjFunction* func = end_compiler();
-    emit_bytes(OpConstant, make_constant(OBJ_VAL(func)));
+    emit_bytes(OpClosure, make_constant(OBJ_VAL(func)));
 }
 
 static void fun_declaration()

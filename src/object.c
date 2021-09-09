@@ -75,16 +75,6 @@ ObjString* copy_string(const char* chars, int length)
     return allocate_string(heap_chars, length, hash);
 }
 
-static void print_function(const ObjFunction* func)
-{
-    if (func->name == NULL)
-    {
-        printf("<script>");
-        return;
-    }
-    printf("<fn %s>", func->name->chars);
-}
-
 ObjFunction* new_function()
 {
     ObjFunction* func = ALLOCATE_OBJ(ObjFunction, ObjTypeFunction);
@@ -101,6 +91,23 @@ ObjNative* new_native(NativeFn func)
     return native;
 }
 
+ObjClosure* new_closure(ObjFunction* func)
+{
+    ObjClosure* closure = ALLOCATE_OBJ(ObjClosure, ObjTypeClosure);
+    closure->func       = func;
+    return closure;
+}
+
+static void print_function(const ObjFunction* func)
+{
+    if (func->name == NULL)
+    {
+        printf("<script>");
+        return;
+    }
+    printf("<fn %s>", func->name->chars);
+}
+
 void print_object(const Value* value)
 {
     switch (OBJ_TYPE(*value))
@@ -113,6 +120,9 @@ void print_object(const Value* value)
             break;
         case ObjTypeNative:
             printf("<native fn>");
+            break;
+        case ObjTypeClosure:
+            print_function(AS_CLOSURE(*value)->func);
             break;
     }
 }

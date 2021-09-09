@@ -4,6 +4,7 @@
 
 #include <clocks/chunk.h>
 #include <clocks/common.h>
+#include <clocks/value.h>
 
 void disassemble_chunk(const Chunk* chunk, const char* name)
 {
@@ -46,6 +47,16 @@ static int jump_instruction(const char* name, const int sign,
     jump |= chunk->code[offset + 2];
     printf("%-16s %4d -> %d\n", name, offset, offset + 3 + sign * jump);
     return offset + 3;
+}
+
+static int closure_instruction(const Chunk* chunk, int offset)
+{
+    offset++;
+    const uint8_t constant = chunk->code[offset++];
+    printf("%-16s %4d ", "OpClosure", constant);
+    print_value(chunk->constants.values[constant]);
+    printf("\n");
+    return offset;
 }
 
 int disassemble_instruction(const Chunk* chunk, const int offset)
@@ -119,6 +130,9 @@ int disassemble_instruction(const Chunk* chunk, const int offset)
 
         case OpCall:
             return byte_instruction("OpCall", chunk, offset);
+
+        case OpClosure:
+            return closure_instruction(chunk, offset);
 
         case OpReturn:
             return simple_instruction("OpReturn", offset);
