@@ -729,7 +729,7 @@ static void function(const FunctionType type)
 
 static void fun_declaration()
 {
-    uint8_t global = parse_variable("Expect function name");
+    const uint8_t global = parse_variable("Expect function name");
     mark_initialized();
     function(FuncTypeFunction);
     define_variable(global);
