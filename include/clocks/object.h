@@ -89,6 +89,7 @@ struct ObjUpvalue
 {
     Obj         obj;
     Value*      loc;
+    Value       closed;
     ObjUpvalue* next;
 };
 

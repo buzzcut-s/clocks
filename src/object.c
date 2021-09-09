@@ -6,6 +6,7 @@
 #include <clocks/chunk.h>
 #include <clocks/memory.h>
 #include <clocks/table.h>
+#include <clocks/value.h>
 #include <clocks/vm.h>
 
 #define ALLOCATE_OBJ(type, obj_type) \
@@ -109,6 +110,7 @@ ObjUpvalue* new_upvalue(Value* slot)
 {
     ObjUpvalue* upvalue = ALLOCATE_OBJ(ObjUpvalue, ObjTypeUpvalue);
     upvalue->loc        = slot;
+    upvalue->closed     = NIL_VAL;
     upvalue->next       = NULL;
     return upvalue;
 }

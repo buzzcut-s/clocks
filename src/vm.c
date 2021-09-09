@@ -186,6 +186,18 @@ static ObjUpvalue* capture_upvalue(Value* local)
     return captured_upvalue;
 }
 
+static void close_upvalues(const Value* last)
+{
+    while (vm.open_upvalues_head != NULL
+           && vm.open_upvalues_head->loc >= last)
+    {
+        ObjUpvalue* hoisted_upvalue = vm.open_upvalues_head;
+        hoisted_upvalue->closed     = *hoisted_upvalue->loc;
+        hoisted_upvalue->loc        = &hoisted_upvalue->closed;
+        vm.open_upvalues_head       = hoisted_upvalue->next;
+    }
+}
+
 static InterpretResult run()
 {
     CallFrame* frame = &vm.frames[vm.frame_count - 1];
@@ -406,9 +418,15 @@ static InterpretResult run()
                 break;
             }
 
+            case OpCloseUpvalue:
+                close_upvalues(vm.stack_top - 1);
+                pop();
+                break;
+
             case OpReturn:
             {
                 const Value result = pop();
+                close_upvalues(frame->slots);
                 vm.frame_count--;
                 if (vm.frame_count == 0)
                 {
