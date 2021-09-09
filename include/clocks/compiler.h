@@ -1,8 +1,8 @@
 #ifndef COMPILER_H
 #define COMPILER_H
 
-#include <clocks/chunk.h>
-#include <clocks/object.h>
+#include "chunk.h"
+#include "object.h"
 
 ObjFunction* compile(const char* source);
 
