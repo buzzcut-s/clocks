@@ -99,6 +99,13 @@ ObjClosure* new_closure(ObjFunction* func)
     return closure;
 }
 
+ObjUpvalue* new_upvalue(Value* slot)
+{
+    ObjUpvalue* upvalue = ALLOCATE_OBJ(ObjUpvalue, ObjTypeUpvalue);
+    upvalue->loc        = slot;
+    return upvalue;
+}
+
 static void print_function(const ObjFunction* func)
 {
     if (func->name == NULL)
@@ -124,6 +131,9 @@ void print_object(const Value* value)
             break;
         case ObjTypeClosure:
             print_function(AS_CLOSURE(*value)->func);
+            break;
+        case ObjTypeUpvalue:
+            printf("upvalue");
             break;
     }
 }

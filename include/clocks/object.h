@@ -10,6 +10,7 @@ typedef enum
     ObjTypeFunction,
     ObjTypeNative,
     ObjTypeClosure,
+    ObjTypeUpvalue,
 } ObjType;
 
 struct Obj
@@ -79,5 +80,13 @@ typedef struct
 #define AS_CLOSURE(value) ((ObjClosure*)AS_OBJ(value))
 
 ObjClosure* new_closure(ObjFunction* func);
+
+typedef struct
+{
+    Obj    obj;
+    Value* loc;
+} ObjUpvalue;
+
+ObjUpvalue* new_upvalue(Value* slot);
 
 #endif  // OBJECT_H

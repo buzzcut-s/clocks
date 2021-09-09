@@ -45,6 +45,9 @@ static void free_object(Obj* object)
         case ObjTypeClosure:
             FREE(ObjClosure, object);
             break;
+        case ObjTypeUpvalue:
+            FREE(ObjUpvalue, object);
+            break;
     }
 }
 
