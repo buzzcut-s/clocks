@@ -94,8 +94,14 @@ ObjNative* new_native(NativeFn func)
 
 ObjClosure* new_closure(ObjFunction* func)
 {
-    ObjClosure* closure = ALLOCATE_OBJ(ObjClosure, ObjTypeClosure);
-    closure->func       = func;
+    ObjUpvalue** upvalues = ALLOCATE(ObjUpvalue*, func->upvalue_count);
+    for (int i = 0; i < func->upvalue_count; i++)
+        upvalues[i] = NULL;
+
+    ObjClosure* closure    = ALLOCATE_OBJ(ObjClosure, ObjTypeClosure);
+    closure->func          = func;
+    closure->upvalues      = upvalues;
+    closure->upvalue_count = func->upvalue_count;
     return closure;
 }
 

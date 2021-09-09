@@ -4,6 +4,8 @@
 #include "chunk.h"
 #include "value.h"
 
+typedef struct ObjUpvalue ObjUpvalue;
+
 typedef enum
 {
     ObjTypeString,
@@ -74,6 +76,8 @@ typedef struct
 {
     Obj          obj;
     ObjFunction* func;
+    ObjUpvalue** upvalues;
+    int          upvalue_count;
 } ObjClosure;
 
 #define IS_CLOSURE(value) is_obj_type(value, ObjTypeClosure)
@@ -81,11 +85,11 @@ typedef struct
 
 ObjClosure* new_closure(ObjFunction* func);
 
-typedef struct
+struct ObjUpvalue
 {
     Obj    obj;
     Value* loc;
-} ObjUpvalue;
+};
 
 ObjUpvalue* new_upvalue(Value* slot);
 
