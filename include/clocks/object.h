@@ -87,8 +87,9 @@ ObjClosure* new_closure(ObjFunction* func);
 
 struct ObjUpvalue
 {
-    Obj    obj;
-    Value* loc;
+    Obj         obj;
+    Value*      loc;
+    ObjUpvalue* next;
 };
 
 ObjUpvalue* new_upvalue(Value* slot);

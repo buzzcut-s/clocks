@@ -26,7 +26,8 @@ typedef struct
     Table globals;
     Table strings;
 
-    Obj* obj_head;
+    Obj*        obj_head;
+    ObjUpvalue* open_upvalues_head;
 } VM;
 
 typedef enum

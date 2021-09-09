@@ -65,7 +65,8 @@ void init_vm()
     reset_stack();
     init_table(&vm.globals);
     init_table(&vm.strings);
-    vm.obj_head = NULL;
+    vm.obj_head           = NULL;
+    vm.open_upvalues_head = NULL;
 
     define_native("clock", clock_native);
 }
@@ -162,7 +163,26 @@ static bool call_value(const Value callee, const int arg_count)
 
 static ObjUpvalue* capture_upvalue(Value* local)
 {
+    ObjUpvalue* prev_upvalue = NULL;
+    ObjUpvalue* upvalue      = vm.open_upvalues_head;
+
+    while (upvalue != NULL && upvalue->loc > local)
+    {
+        prev_upvalue = upvalue;
+        upvalue      = upvalue->next;
+    }
+
+    if (upvalue != NULL && upvalue->loc == local)
+        return upvalue;
+
     ObjUpvalue* captured_upvalue = new_upvalue(local);
+    captured_upvalue->next       = upvalue;
+
+    if (prev_upvalue == NULL)
+        vm.open_upvalues_head = captured_upvalue;
+    else
+        prev_upvalue->next = captured_upvalue;
+
     return captured_upvalue;
 }
 
