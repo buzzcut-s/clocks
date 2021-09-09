@@ -150,6 +150,9 @@ int disassemble_instruction(const Chunk* chunk, const int offset)
         case OpClosure:
             return closure_instruction(chunk, offset);
 
+        case OpCloseUpvalue:
+            return simple_instruction("OpCloseUpvalue", offset);
+
         case OpReturn:
             return simple_instruction("OpReturn", offset);
 

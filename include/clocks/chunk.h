@@ -33,6 +33,7 @@ typedef enum
     OpLoop,
     OpCall,
     OpClosure,
+    OpCloseUpvalue,
     OpReturn,
 } OpCode;
 
