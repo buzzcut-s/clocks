@@ -367,6 +367,9 @@ static InterpretResult run()
                 frame = &vm.frames[vm.frame_count - 1];
                 break;
             }
+
+            default:
+                printf("Unknown opcode %d\n", instruction);
         }
     }
 
