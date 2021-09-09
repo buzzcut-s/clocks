@@ -10,9 +10,9 @@
 
 typedef struct
 {
-    ObjFunction* func;
-    uint8_t*     ip;
-    Value*       slots;
+    ObjClosure* closure;
+    uint8_t*    ip;
+    Value*      slots;
 } CallFrame;
 
 typedef struct
