@@ -52,6 +52,12 @@ typedef struct
     int   depth;
 } Local;
 
+typedef struct
+{
+    uint8_t index;
+    bool    is_local;
+} Upvalue;
+
 typedef enum
 {
     FuncTypeFunction,
@@ -65,6 +71,7 @@ typedef struct Compiler
     FunctionType     type;
     Local            locals[UINT8_COUNT];
     int              local_count;
+    Upvalue          upvalues[UINT8_COUNT];
     int              scope_depth;
 } Compiler;
 
@@ -82,6 +89,7 @@ static void declaration();
 
 static uint8_t identifier_constant(const Token* name);
 static int     resolve_local(const Compiler* compiler, const Token* name);
+static int     resolve_upvalue(Compiler* compiler, const Token* name);
 
 static uint8_t argument_list();
 
@@ -291,16 +299,21 @@ static void named_variable(const Token name, const bool can_assign)
     uint8_t assign_op = 0;
 
     int arg = resolve_local(current, &name);
-    if (arg == -1)
+    if (arg != -1)
+    {
+        read_op   = OpReadLocal;
+        assign_op = OpAssignLocal;
+    }
+    else if ((arg = resolve_upvalue(current, &name)) != -1)
+    {
+        read_op   = OpReadUpvalue;
+        assign_op = OpAssignUpvalue;
+    }
+    else
     {
         arg       = identifier_constant(&name);
         read_op   = OpReadGlobal;
         assign_op = OpAssignGlobal;
-    }
-    else
-    {
-        read_op   = OpReadLocal;
-        assign_op = OpAssignLocal;
     }
 
     if (can_assign && match(TokenEqual))
@@ -524,6 +537,52 @@ static int resolve_local(const Compiler* compiler, const Token* name)
     return -1;
 }
 
+static int upvalue_exists(const Compiler* compiler, const uint8_t index,
+                          const bool is_local, const int upvalue_count)
+{
+    for (int i = 0; i < upvalue_count; i++)
+    {
+        const Upvalue* upvalue = &compiler->upvalues[i];
+        if (upvalue->index == index && upvalue->is_local == is_local)
+            return i;
+    }
+    return -1;
+}
+
+static int add_upvalue(Compiler* compiler, const uint8_t index, const bool is_local)
+{
+    const int upvalue_count = compiler->func->upvalue_count;
+    if (upvalue_count == UINT8_COUNT)
+    {
+        error("Too many closure variables in function.");
+        return 0;
+    }
+
+    const int existing_index = upvalue_exists(compiler, index, is_local, upvalue_count);
+    if (existing_index != -1)
+        return existing_index;
+
+    compiler->upvalues[upvalue_count].is_local = is_local;
+    compiler->upvalues[upvalue_count].index    = index;
+    return compiler->func->upvalue_count++;
+}
+
+static int resolve_upvalue(Compiler* compiler, const Token* name)
+{
+    if (compiler->enclosing == NULL)
+        return -1;
+
+    const int base_local = resolve_local(compiler->enclosing, name);
+    if (base_local != -1)
+        return add_upvalue(compiler, (uint8_t)base_local, true);
+
+    const int outer_upvalue = resolve_upvalue(compiler->enclosing, name);
+    if (outer_upvalue != -1)
+        return add_upvalue(compiler, (uint8_t)outer_upvalue, false);
+
+    return -1;
+}
+
 static void add_local(const Token name)
 {
     if (current->local_count == UINT8_COUNT)
@@ -651,6 +710,12 @@ static void function(const FunctionType type)
 
     ObjFunction* func = end_compiler();
     emit_bytes(OpClosure, make_constant(OBJ_VAL(func)));
+
+    for (int i = 0; i < func->upvalue_count; i++)
+    {
+        emit_byte(compiler.upvalues[i].is_local ? 1 : 0);
+        emit_byte(compiler.upvalues[i].index);
+    }
 }
 
 static void fun_declaration()

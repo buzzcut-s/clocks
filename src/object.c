@@ -77,9 +77,10 @@ ObjString* copy_string(const char* chars, int length)
 
 ObjFunction* new_function()
 {
-    ObjFunction* func = ALLOCATE_OBJ(ObjFunction, ObjTypeFunction);
-    func->arity       = 0;
-    func->name        = NULL;
+    ObjFunction* func   = ALLOCATE_OBJ(ObjFunction, ObjTypeFunction);
+    func->arity         = 0;
+    func->upvalue_count = 0;
+    func->name          = NULL;
     init_chunk(&func->chunk);
     return func;
 }

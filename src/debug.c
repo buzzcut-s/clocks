@@ -4,6 +4,7 @@
 
 #include <clocks/chunk.h>
 #include <clocks/common.h>
+#include <clocks/object.h>
 #include <clocks/value.h>
 
 void disassemble_chunk(const Chunk* chunk, const char* name)
@@ -56,6 +57,16 @@ static int closure_instruction(const Chunk* chunk, int offset)
     printf("%-16s %4d ", "OpClosure", constant);
     print_value(chunk->constants.values[constant]);
     printf("\n");
+
+    const ObjFunction* func = AS_FUNCTION(chunk->constants.values[constant]);
+    for (int i = 0; i < func->upvalue_count; i++)
+    {
+        const int is_local = chunk->code[offset++];
+        const int index    = chunk->code[offset++];
+        printf("%04d      |                     %s %d\n",
+               offset - 2, is_local ? "local" : "upvalue", index);
+    }
+
     return offset;
 }
 
@@ -95,6 +106,11 @@ int disassemble_instruction(const Chunk* chunk, const int offset)
             return constant_instruction("OpDefineGlobal", chunk, offset);
         case OpAssignGlobal:
             return constant_instruction("OpAssignGlobal", chunk, offset);
+
+        case OpReadUpvalue:
+            return byte_instruction("OpReadUpvalue", chunk, offset);
+        case OpAssignUpvalue:
+            return byte_instruction("OpAssignUpvalue", chunk, offset);
 
         case OpEqual:
             return simple_instruction("OpEqual", offset);
