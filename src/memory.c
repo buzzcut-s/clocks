@@ -127,6 +127,7 @@ static void blacken_object(Obj* gray_obj)
             ObjClosure* closure = (ObjClosure*)gray_obj;
             mark_object((Obj*)closure->func);
             mark_upvalues(closure);
+            break;
         }
 
         case ObjTypeUpvalue:
