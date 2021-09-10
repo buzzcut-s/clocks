@@ -185,8 +185,8 @@ void collect_garbage()
 
     mark_roots();
     trace_references();
-    sweep();
     table_remove_white(&vm.strings);
+    sweep();
 
 #ifdef DEBUG_LOG_GC
     printf("-- gc end\n");
