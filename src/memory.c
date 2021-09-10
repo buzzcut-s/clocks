@@ -58,6 +58,10 @@ static void mark_roots()
 {
     for (Value* slot = vm.stack; slot < vm.stack_top; slot++)
         mark_value(*slot);
+
+    for (int i = 0; i < vm.frame_count; i++)
+        mark_object((Obj*)vm.frames[i].closure);
+
     mark_table(&vm.globals);
 }
 
