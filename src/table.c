@@ -157,3 +157,13 @@ ObjString* table_find_string(const Table* table, const char* chars,
         index = (index + 1) % table->capacity;
     }
 }
+
+void mark_table(const Table* table)
+{
+    for (int i = 0; i < table->capacity; i++)
+    {
+        const Entry* entry = &table->entries[i];
+        mark_object((Obj*)entry->key);
+        mark_value(entry->value);
+    }
+}

@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include <clocks/chunk.h>
+#include <clocks/common.h>
 #include <clocks/memory.h>
 #include <clocks/table.h>
 #include <clocks/value.h>
@@ -14,8 +15,9 @@
 
 static Obj* allocate_obj(const size_t size, const ObjType type)
 {
-    Obj* object  = (Obj*)reallocate(NULL, 0, size);
-    object->type = type;
+    Obj* object       = (Obj*)reallocate(NULL, 0, size);
+    object->type      = type;
+    object->is_marked = false;
 
     object->next = vm.obj_head;
     vm.obj_head  = object;
