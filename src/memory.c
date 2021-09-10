@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include <clocks/chunk.h>
+#include <clocks/compiler.h>
 #include <clocks/object.h>
 #include <clocks/value.h>
 #include <clocks/vm.h>
@@ -67,6 +68,7 @@ static void mark_roots()
         mark_object((Obj*)upvalue);
 
     mark_table(&vm.globals);
+    mark_compiler_roots();
 }
 
 void collect_garbage()

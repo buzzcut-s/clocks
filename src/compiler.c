@@ -6,6 +6,7 @@
 
 #include <clocks/chunk.h>
 #include <clocks/common.h>
+#include <clocks/memory.h>
 #include <clocks/object.h>
 #include <clocks/scanner.h>
 #include <clocks/value.h>
@@ -937,4 +938,14 @@ ObjFunction* compile(const char* source)
 
     ObjFunction* func = end_compiler();
     return parser.had_error ? NULL : func;
+}
+
+void mark_compiler_roots()
+{
+    Compiler* compiler = current;
+    while (compiler != NULL)
+    {
+        mark_object((Obj*)compiler->func);
+        compiler = compiler->enclosing;
+    }
 }
