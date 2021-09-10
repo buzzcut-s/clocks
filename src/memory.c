@@ -62,6 +62,10 @@ static void mark_roots()
     for (int i = 0; i < vm.frame_count; i++)
         mark_object((Obj*)vm.frames[i].closure);
 
+    for (ObjUpvalue* upvalue = vm.open_upvalues_head; upvalue != NULL;
+         upvalue             = upvalue->next)
+        mark_object((Obj*)upvalue);
+
     mark_table(&vm.globals);
 }
 
