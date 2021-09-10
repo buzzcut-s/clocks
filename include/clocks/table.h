@@ -30,5 +30,6 @@ ObjString* table_find_string(const Table* table, const char* chars,
                              int length, uint32_t hash);
 
 void mark_table(const Table* table);
+void table_remove_white(Table* table);
 
 #endif  // TABLE_H

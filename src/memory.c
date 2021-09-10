@@ -6,6 +6,7 @@
 #include <clocks/common.h>
 #include <clocks/compiler.h>
 #include <clocks/object.h>
+#include <clocks/table.h>
 #include <clocks/value.h>
 #include <clocks/vm.h>
 
@@ -185,6 +186,7 @@ void collect_garbage()
     mark_roots();
     trace_references();
     sweep();
+    table_remove_white(&vm.strings);
 
 #ifdef DEBUG_LOG_GC
     printf("-- gc end\n");
