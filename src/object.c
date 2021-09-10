@@ -24,7 +24,7 @@ static Obj* allocate_obj(const size_t size, const ObjType type)
 
 #ifdef DEBUG_LOG_GC
     const char* types[] = {"ObjString", "ObjFunction", "ObjNative", "ObjClosure", "ObjUpvalue"};
-    printf("%p allocate %zu for %s\n", (void*)object, size, types[type]);
+    printf("%p allocate %zu bytes for %s\n", (void*)object, size, types[type]);
 #endif
 
     return object;
