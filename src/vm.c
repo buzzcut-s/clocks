@@ -108,8 +108,8 @@ static bool is_falsey(const Value value)
 
 static void concatenate()
 {
-    const ObjString* b = AS_STRING(pop());
-    const ObjString* a = AS_STRING(pop());
+    const ObjString* b = AS_STRING(peek(0));
+    const ObjString* a = AS_STRING(peek(1));
 
     const int length = a->length + b->length;
 
@@ -119,6 +119,8 @@ static void concatenate()
     chars[length] = '\0';
 
     ObjString* res = take_string(chars, length);
+    pop();
+    pop();
     push(OBJ_VAL(res));
 }
 
