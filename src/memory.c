@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include <clocks/chunk.h>
+#include <clocks/common.h>
 #include <clocks/compiler.h>
 #include <clocks/object.h>
 #include <clocks/value.h>
@@ -15,6 +16,7 @@
 #endif
 
 static void blacken_object(Obj* gray_obj);
+static void free_object(Obj* object);
 
 void* reallocate(void* pointer, const size_t old_size, const size_t new_size)
 {
@@ -146,6 +148,33 @@ static void trace_references()
     }
 }
 
+static void sweep()
+{
+    Obj* prev = NULL;
+    Obj* curr = vm.obj_head;
+    while (curr != NULL)
+    {
+        if (curr->is_marked)
+        {
+            curr->is_marked = false;
+            prev            = curr;
+            curr            = curr->next;
+        }
+        else
+        {
+            Obj* unreached = curr;
+
+            curr = curr->next;
+            if (prev != NULL)
+                prev->next = curr;
+            else
+                vm.obj_head = curr;
+
+            free_object(unreached);
+        }
+    }
+}
+
 void collect_garbage()
 {
 #ifdef DEBUG_LOG_GC
@@ -154,6 +183,7 @@ void collect_garbage()
 
     mark_roots();
     trace_references();
+    sweep();
 
 #ifdef DEBUG_LOG_GC
     printf("-- gc end\n");
