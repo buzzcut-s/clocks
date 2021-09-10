@@ -4,6 +4,7 @@
 
 #include <clocks/memory.h>
 #include <clocks/value.h>
+#include <clocks/vm.h>
 
 void init_chunk(Chunk* chunk)
 {
@@ -42,6 +43,8 @@ void write_chunk(Chunk* chunk, const uint8_t byte, const int lines)
 
 int add_constant(Chunk* chunk, const Value value)
 {
+    push(value);
     write_value_array(&chunk->constants, value);
+    pop();
     return chunk->constants.count - 1;
 }
