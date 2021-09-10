@@ -20,6 +20,11 @@ static Obj* allocate_obj(const size_t size, const ObjType type)
     object->next = vm.obj_head;
     vm.obj_head  = object;
 
+#ifdef DEBUG_LOG_GC
+    const char* types[] = {"ObjString", "ObjFunction", "ObjNative", "ObjClosure", "ObjUpvalue"};
+    printf("%p allocate %zu for %s\n", (void*)object, size, types[type]);
+#endif
+
     return object;
 }
 

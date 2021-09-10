@@ -20,6 +20,8 @@
 
 void* reallocate(void* pointer, size_t old_size, size_t new_size);
 
+void collect_garbage();
+
 void free_objects();
 
 #endif  // MEMORY_H

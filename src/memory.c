@@ -6,8 +6,21 @@
 #include <clocks/object.h>
 #include <clocks/vm.h>
 
+#ifdef DEBUG_LOG_GC
+#include <stdio.h>
+
+#include <clocks/debug.h>
+#endif
+
 void* reallocate(void* pointer, const size_t old_size, const size_t new_size)
 {
+    if (new_size > old_size)
+    {
+#ifdef DEBUG_STRESS_GC
+        collect_garbage();
+#endif
+    }
+
     if (new_size == 0)
     {
         free(pointer);
@@ -21,8 +34,24 @@ void* reallocate(void* pointer, const size_t old_size, const size_t new_size)
     return result;
 }
 
+void collect_garbage()
+{
+#ifdef DEBUG_LOG_GC
+    printf("-- gc begin\n");
+#endif
+
+#ifdef DEBUG_LOG_GC
+    printf("-- gc end\n");
+#endif
+}
+
 static void free_object(Obj* object)
 {
+#ifdef DEBUG_LOG_GC
+    const char* types[] = {"ObjString", "ObjFunction", "ObjNative", "ObjClosure", "ObjUpvalue"};
+    printf("%p free type %s\n", (void*)object, types[object->type]);
+#endif
+
     switch (object->type)
     {
         case ObjTypeString:
