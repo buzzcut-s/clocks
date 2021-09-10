@@ -71,6 +71,8 @@ void init_vm()
     vm.gray_count         = 0;
     vm.gray_capacity      = 0;
     vm.gray_stack         = NULL;
+    vm.bytes_allocated    = 0;
+    vm.next_gc_thresh     = 1024 * 1024;
 
     define_native("clock", clock_native);
 }

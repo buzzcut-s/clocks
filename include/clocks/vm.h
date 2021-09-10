@@ -26,6 +26,9 @@ typedef struct
     Table globals;
     Table strings;
 
+    size_t bytes_allocated;
+    size_t next_gc_thresh;
+
     Obj*        obj_head;
     ObjUpvalue* open_upvalues_head;
 
