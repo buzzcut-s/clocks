@@ -38,7 +38,7 @@ void* reallocate(void* pointer, const size_t old_size, const size_t new_size)
 
 void mark_object(Obj* object)
 {
-    if (object == NULL)
+    if (object == NULL || object->is_marked)
         return;
 #ifdef DEBUG_LOG_GC
     printf("%p mark ", (void*)object);
@@ -82,6 +82,62 @@ static void mark_roots()
     mark_compiler_roots();
 }
 
+static void mark_array(ValueArray* array)
+{
+    for (int i = 0; i < array->count; i++)
+        mark_value(array->values[i]);
+}
+
+static void mark_upvalues(ObjClosure* closure)
+{
+    for (int i = 0; i < closure->upvalue_count; i++)
+        mark_object((Obj*)closure->upvalues[i]);
+}
+
+static void blacken_object(Obj* gray_obj)
+{
+#ifdef DEBUG_LOG_GC
+    printf("%p blacken ", (void*)gray_obj);
+    print_value(OBJ_VAL(gray_obj));
+    printf("\n");
+#endif
+
+    switch (gray_obj->type)
+    {
+        case ObjTypeFunction:
+        {
+            ObjFunction* func = (ObjFunction*)gray_obj;
+            mark_object((Obj*)func->name);
+            mark_array(&func->chunk.constants);
+            break;
+        }
+
+        case ObjTypeClosure:
+        {
+            ObjClosure* closure = (ObjClosure*)gray_obj;
+            mark_object((Obj*)closure->func);
+            mark_upvalues(closure);
+        }
+
+        case ObjTypeUpvalue:
+            mark_value(((ObjUpvalue*)gray_obj)->closed);
+            break;
+
+        case ObjTypeString:
+        case ObjTypeNative:
+            break;
+    }
+}
+
+static void trace_references()
+{
+    while (vm.gray_count > 0)
+    {
+        Obj* gray_object = vm.gray_stack[--vm.gray_count];
+        blacken_object(gray_object);
+    }
+}
+
 void collect_garbage()
 {
 #ifdef DEBUG_LOG_GC
@@ -89,6 +145,7 @@ void collect_garbage()
 #endif
 
     mark_roots();
+    trace_references();
 
 #ifdef DEBUG_LOG_GC
     printf("-- gc end\n");
