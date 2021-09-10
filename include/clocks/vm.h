@@ -17,17 +17,21 @@ typedef struct
 
 typedef struct
 {
-    CallFrame frames[FRAMES_MAX];
-    int       frame_count;
-
-    Value  stack[STACK_MAX];
     Value* stack_top;
+    Value  stack[STACK_MAX];
+
+    int       frame_count;
+    CallFrame frames[FRAMES_MAX];
 
     Table globals;
     Table strings;
 
     Obj*        obj_head;
     ObjUpvalue* open_upvalues_head;
+
+    int   gray_count;
+    int   gray_capacity;
+    Obj** gray_stack;
 } VM;
 
 typedef enum

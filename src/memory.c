@@ -47,6 +47,17 @@ void mark_object(Obj* object)
 #endif
 
     object->is_marked = true;
+
+    if (vm.gray_capacity < vm.gray_count + 1)
+    {
+        vm.gray_capacity = GROW_CAPACITY(vm.gray_capacity);
+        vm.gray_stack    = (Obj**)realloc(vm.gray_stack,
+                                          sizeof(Obj*) * vm.gray_capacity);
+        if (vm.gray_stack == NULL)
+            exit(1);
+    }
+
+    vm.gray_stack[vm.gray_count++] = object;
 }
 
 void mark_value(Value value)
@@ -132,4 +143,6 @@ void free_objects()
         free_object(curr);
         curr = next;
     }
+
+    free(vm.gray_stack);
 }
