@@ -143,8 +143,7 @@ ObjString* table_find_string(const Table* table, const char* chars,
     {
         const Entry* entry = &table->entries[index];
 
-        const bool empty_entry = (entry->key == NULL);
-        if (empty_entry)
+        if (entry->key == NULL)
         {
             const bool not_tombstone = IS_NIL(entry->value);
             if (not_tombstone)
