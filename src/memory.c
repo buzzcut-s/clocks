@@ -14,6 +14,8 @@
 #include <clocks/debug.h>
 #endif
 
+static void blacken_object(Obj* gray_obj);
+
 void* reallocate(void* pointer, const size_t old_size, const size_t new_size)
 {
     if (new_size > old_size)
@@ -47,6 +49,12 @@ void mark_object(Obj* object)
 #endif
 
     object->is_marked = true;
+
+    if (object->type == ObjTypeString || object->type == ObjTypeNative)
+    {
+        blacken_object(object);
+        return;
+    }
 
     if (vm.gray_capacity < vm.gray_count + 1)
     {
