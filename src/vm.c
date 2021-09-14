@@ -212,6 +212,14 @@ static void close_upvalues(const Value* last)
     }
 }
 
+static void define_method(ObjString* name)
+{
+    const Value method = peek(0);
+    ObjClass*   klass  = AS_CLASS(peek(1));
+    table_insert(&klass->methods, name, method);
+    pop();
+}
+
 static InterpretResult run()
 {
     CallFrame* frame = &vm.frames[vm.frame_count - 1];
@@ -496,6 +504,9 @@ static InterpretResult run()
 
             case OpClass:
                 push(OBJ_VAL(new_class(READ_STRING())));
+                break;
+            case OpMethod:
+                define_method(READ_STRING());
                 break;
 
             default:

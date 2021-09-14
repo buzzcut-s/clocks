@@ -751,9 +751,21 @@ static void fun_declaration()
     define_variable(global);
 }
 
+static void method()
+{
+    consume(TokenIdentifier, "Expect method name.");
+
+    const uint8_t constant = identifier_constant(&parser.previous);
+
+    function(FuncTypeFunction);
+
+    emit_bytes(OpMethod, constant);
+}
+
 static void class_declaration()
 {
     consume(TokenIdentifier, "Expect class name.");
+    const Token class_name = parser.previous;
 
     const uint8_t name_constant = identifier_constant(&parser.previous);
     declare_variable();
@@ -761,8 +773,14 @@ static void class_declaration()
     emit_bytes(OpClass, name_constant);
     define_variable(name_constant);
 
+    named_variable(class_name, false);
     consume(TokenLeftBrace, "Expect '{' before class body.");
+
+    while (!check(TokenRightBrace) && !check(TokenEOF))
+        method();
+
     consume(TokenRightBrace, "Expect '}' after class body.");
+    emit_byte(OpPop);
 }
 
 static void print_statement()
