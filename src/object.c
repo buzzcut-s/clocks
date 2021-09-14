@@ -23,7 +23,8 @@ static Obj* allocate_obj(const size_t size, const ObjType type)
     vm.obj_head  = object;
 
 #ifdef DEBUG_LOG_GC
-    const char* types[] = {"ObjString", "ObjFunction", "ObjNative", "ObjClosure", "ObjUpvalue"};
+    const char* types[] = {"ObjString", "ObjFunction", "ObjNative",
+                           "ObjClosure", "ObjUpvalue", "ObjClass"};
     printf("%p allocate %zu bytes for %s\n", (void*)object, size, types[type]);
 #endif
 
@@ -124,6 +125,13 @@ ObjUpvalue* new_upvalue(Value* slot)
     return upvalue;
 }
 
+ObjClass* new_class(ObjString* name)
+{
+    ObjClass* klass = ALLOCATE_OBJ(ObjClass, ObjTypeClass);
+    klass->name     = name;
+    return klass;
+}
+
 static void print_function(const ObjFunction* func)
 {
     if (func->name == NULL)
@@ -152,6 +160,9 @@ void print_object(const Value* value)
             break;
         case ObjTypeUpvalue:
             printf("upvalue");
+            break;
+        case ObjTypeClass:
+            printf("%s", AS_CLASS(*value)->name->chars);
             break;
     }
 }

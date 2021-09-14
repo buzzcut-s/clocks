@@ -141,6 +141,13 @@ static void blacken_object(Obj* gray_obj)
             mark_value(((ObjUpvalue*)gray_obj)->closed);
             break;
 
+        case ObjTypeClass:
+        {
+            ObjClass* klass = (ObjClass*)gray_obj;
+            mark_object((Obj*)klass->name);
+            break;
+        }
+
         case ObjTypeString:
         case ObjTypeNative:
             break;
@@ -208,7 +215,8 @@ void collect_garbage()
 static void free_object(Obj* object)
 {
 #ifdef DEBUG_LOG_GC
-    const char* types[] = {"ObjString", "ObjFunction", "ObjNative", "ObjClosure", "ObjUpvalue"};
+    const char* types[] = {"ObjString", "ObjFunction", "ObjNative",
+                           "ObjClosure", "ObjUpvalue", "ObjClass"};
     printf("%p free type %s\n", (void*)object, types[object->type]);
 #endif
 
@@ -240,6 +248,9 @@ static void free_object(Obj* object)
         }
         case ObjTypeUpvalue:
             FREE(ObjUpvalue, object);
+            break;
+        case ObjTypeClass:
+            FREE(ObjClass, object);
             break;
     }
 }

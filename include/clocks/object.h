@@ -13,6 +13,7 @@ typedef enum
     ObjTypeNative,
     ObjTypeClosure,
     ObjTypeUpvalue,
+    ObjTypeClass,
 } ObjType;
 
 struct Obj
@@ -95,5 +96,16 @@ struct ObjUpvalue
 };
 
 ObjUpvalue* new_upvalue(Value* slot);
+
+typedef struct
+{
+    Obj        obj;
+    ObjString* name;
+} ObjClass;
+
+#define IS_CLASS(value) is_obj_type(value, ObjTypeClass)
+#define AS_CLASS(value) ((ObjClass*)AS_OBJ(value))
+
+ObjClass* new_class(ObjString* name);
 
 #endif  // OBJECT_H
