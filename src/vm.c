@@ -169,7 +169,8 @@ static bool call_value(const Value callee, const int arg_count)
             }
             case ObjTypeBoundMethod:
             {
-                ObjBoundMethod* bound = AS_BOUND_METHOD(callee);
+                ObjBoundMethod* bound        = AS_BOUND_METHOD(callee);
+                vm.stack_top[-arg_count - 1] = bound->recv;
                 return call(bound->method, arg_count);
             }
             default:
