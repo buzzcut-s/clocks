@@ -220,6 +220,21 @@ static void define_method(ObjString* name)
     pop();
 }
 
+static bool bind_method(const ObjClass* klass, const ObjString* name)
+{
+    Value method;
+    if (!table_find(&klass->methods, name, &method))
+    {
+        runtime_error("Undefined property '%s'.", name->chars);
+        return false;
+    }
+
+    ObjBoundMethod* bound = new_bound_method(peek(0), AS_CLOSURE(method));
+    pop();
+    push(OBJ_VAL(bound));
+    return true;
+}
+
 static InterpretResult run()
 {
     CallFrame* frame = &vm.frames[vm.frame_count - 1];
@@ -376,8 +391,10 @@ static InterpretResult run()
                     break;
                 }
 
-                runtime_error("Undefined property '%s'.", name->chars);
-                return InterpretRuntimeError;
+                if (!bind_method(instance->klass, name))
+                    return InterpretRuntimeError;
+
+                break;
             }
 
             case OpEqual:
