@@ -332,6 +332,46 @@ static InterpretResult run()
                 break;
             }
 
+            case OpSetField:
+            {
+                if (!IS_INSTANCE(peek(1)))
+                {
+                    runtime_error("Only instances have properties.");
+                    return InterpretRuntimeError;
+                }
+
+                ObjInstance* instance = AS_INSTANCE(peek(1));
+                table_insert(&instance->fields, READ_STRING(), peek(0));
+
+                Value value = pop();
+                pop();
+                push(value);
+                break;
+            }
+
+            case OpGetProperty:
+            {
+                if (!IS_INSTANCE(peek(0)))
+                {
+                    runtime_error("Only instances have properties.");
+                    return InterpretRuntimeError;
+                }
+
+                const ObjInstance* instance = AS_INSTANCE(peek(0));
+                const ObjString*   name     = READ_STRING();
+
+                Value value;
+                if (table_find(&instance->fields, name, &value))
+                {
+                    pop();
+                    push(value);
+                    break;
+                }
+
+                runtime_error("Undefined property '%s'.", name->chars);
+                return InterpretRuntimeError;
+            }
+
             case OpEqual:
             {
                 const Value b = pop();
