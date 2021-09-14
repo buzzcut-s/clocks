@@ -24,7 +24,8 @@ static Obj* allocate_obj(const size_t size, const ObjType type)
 
 #ifdef DEBUG_LOG_GC
     const char* types[] = {"ObjString", "ObjFunction", "ObjNative",
-                           "ObjClosure", "ObjUpvalue", "ObjClass"};
+                           "ObjClosure", "ObjUpvalue", "ObjClass",
+                           "ObjTypeInstance"};
     printf("%p allocate %zu bytes for %s\n", (void*)object, size, types[type]);
 #endif
 
@@ -132,6 +133,14 @@ ObjClass* new_class(ObjString* name)
     return klass;
 }
 
+ObjInstance* new_instance(ObjClass* klass)
+{
+    ObjInstance* instance = ALLOCATE_OBJ(ObjInstance, ObjTypeInstance);
+    instance->klass       = klass;
+    init_table(&instance->fields);
+    return instance;
+}
+
 static void print_function(const ObjFunction* func)
 {
     if (func->name == NULL)
@@ -163,6 +172,9 @@ void print_object(const Value* value)
             break;
         case ObjTypeClass:
             printf("%s", AS_CLASS(*value)->name->chars);
+            break;
+        case ObjTypeInstance:
+            printf("%s instance", AS_INSTANCE(*value)->klass->name->chars);
             break;
     }
 }

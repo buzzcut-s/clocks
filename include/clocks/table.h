@@ -1,8 +1,9 @@
 #ifndef TABLE_H
 #define TABLE_H
 
-#include "object.h"
 #include "value.h"
+
+typedef struct ObjString ObjString;
 
 typedef struct
 {

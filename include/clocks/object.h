@@ -2,6 +2,7 @@
 #define OBJECT_H
 
 #include "chunk.h"
+#include "table.h"
 #include "value.h"
 
 typedef struct ObjUpvalue ObjUpvalue;
@@ -14,6 +15,7 @@ typedef enum
     ObjTypeClosure,
     ObjTypeUpvalue,
     ObjTypeClass,
+    ObjTypeInstance,
 } ObjType;
 
 struct Obj
@@ -107,5 +109,17 @@ typedef struct
 #define AS_CLASS(value) ((ObjClass*)AS_OBJ(value))
 
 ObjClass* new_class(ObjString* name);
+
+typedef struct
+{
+    Obj       obj;
+    ObjClass* klass;
+    Table     fields;
+} ObjInstance;
+
+#define IS_INSTANCE(value) is_obj_type(value, ObjTypeInstance)
+#define AS_INSTANCE(value) ((ObjInstance*)AS_OBJ(value))
+
+ObjInstance* new_instance(ObjClass* klass);
 
 #endif  // OBJECT_H
