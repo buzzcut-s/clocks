@@ -167,6 +167,11 @@ static bool call_value(const Value callee, const int arg_count)
                 vm.stack_top[-arg_count - 1] = OBJ_VAL(new_instance(klass));
                 return true;
             }
+            case ObjTypeBoundMethod:
+            {
+                ObjBoundMethod* bound = AS_BOUND_METHOD(callee);
+                return call(bound->method, arg_count);
+            }
             default:
                 break;
         }
