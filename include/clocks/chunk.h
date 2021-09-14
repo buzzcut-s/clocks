@@ -35,6 +35,7 @@ typedef enum
     OpClosure,
     OpCloseUpvalue,
     OpReturn,
+    OpClass,
 } OpCode;
 
 typedef struct

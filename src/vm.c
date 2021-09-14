@@ -448,6 +448,10 @@ static InterpretResult run()
                 break;
             }
 
+            case OpClass:
+                push(OBJ_VAL(new_class(READ_STRING())));
+                break;
+
             default:
                 printf("Unknown opcode %d\n", instruction);
         }
