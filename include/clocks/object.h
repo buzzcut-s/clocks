@@ -16,6 +16,7 @@ typedef enum
     ObjTypeUpvalue,
     ObjTypeClass,
     ObjTypeInstance,
+    ObjTypeBoundMethod,
 } ObjType;
 
 struct Obj
@@ -122,5 +123,17 @@ typedef struct
 #define AS_INSTANCE(value) ((ObjInstance*)AS_OBJ(value))
 
 ObjInstance* new_instance(ObjClass* klass);
+
+typedef struct
+{
+    Obj         obj;
+    Value       recv;
+    ObjClosure* method;
+} ObjBoundMethod;
+
+#define IS_BOUND_METHOD(value) is_obj_type(value, ObjTypeBoundMethod)
+#define AS_BOUND_METHOD(value) ((ObjBoundMethod*)AS_OBJ(value))
+
+ObjBoundMethod* new_bound_method(Value recv, ObjClosure* method);
 
 #endif  // OBJECT_H

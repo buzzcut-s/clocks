@@ -157,6 +157,14 @@ static void blacken_object(Obj* gray_obj)
             break;
         }
 
+        case ObjTypeBoundMethod:
+        {
+            ObjBoundMethod* bound = (ObjBoundMethod*)gray_obj;
+            mark_value(bound->recv);
+            mark_object((Obj*)bound->method);
+            break;
+        }
+
         case ObjTypeString:
         case ObjTypeNative:
             break;
@@ -224,9 +232,8 @@ void collect_garbage()
 static void free_object(Obj* object)
 {
 #ifdef DEBUG_LOG_GC
-    const char* types[] = {"ObjString", "ObjFunction", "ObjNative",
-                           "ObjClosure", "ObjUpvalue", "ObjClass",
-                           "ObjTypeInstance"};
+    const char* types[] = {"ObjString", "ObjFunction", "ObjNative", "ObjClosure",
+                           "ObjUpvalue", "ObjClass", "ObjTypeInstance", "ObjTypeBoundMethod"};
     printf("%p free type %s\n", (void*)object, types[object->type]);
 #endif
 
@@ -273,6 +280,9 @@ static void free_object(Obj* object)
             FREE(ObjInstance, instance);
             break;
         }
+        case ObjTypeBoundMethod:
+            FREE(ObjBoundMethod, object);
+            break;
     }
 }
 
