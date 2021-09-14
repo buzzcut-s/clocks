@@ -63,7 +63,8 @@ typedef struct
 typedef enum
 {
     FuncTypeFunction,
-    FuncTypeScript
+    FuncTypeMethod,
+    FuncTypeScript,
 } FunctionType;
 
 typedef struct Compiler
@@ -244,8 +245,17 @@ static void init_compiler(Compiler* compiler, const FunctionType type)
     Local* local       = &current->locals[current->local_count++];
     local->depth       = 0;
     local->is_captured = false;
-    local->name.start  = "";
-    local->name.length = 0;
+
+    if (type != FuncTypeFunction)
+    {
+        local->name.start  = "this";
+        local->name.length = 4;
+    }
+    else
+    {
+        local->name.start  = "";
+        local->name.length = 0;
+    }
 }
 
 static ObjFunction* end_compiler()
@@ -459,6 +469,11 @@ static void dot(const bool can_assign)
         emit_bytes(OpGetProperty, name);
 }
 
+static void this_fn(__attribute__((unused)) const bool can_assign)
+{
+    variable(false);
+}
+
 const ParseRule RULES[] = {
   [TokenLeftParen]    = {grouping, call, PrecCall},
   [TokenRightParen]   = {NULL, NULL, PrecNone},
@@ -494,7 +509,7 @@ const ParseRule RULES[] = {
   [TokenPrint]        = {NULL, NULL, PrecNone},
   [TokenReturn]       = {NULL, NULL, PrecNone},
   [TokenSuper]        = {NULL, NULL, PrecNone},
-  [TokenThis]         = {NULL, NULL, PrecNone},
+  [TokenThis]         = {this_fn, NULL, PrecNone},
   [TokenTrue]         = {literal, NULL, PrecNone},
   [TokenVar]          = {NULL, NULL, PrecNone},
   [TokenWhile]        = {NULL, NULL, PrecNone},
@@ -757,7 +772,7 @@ static void method()
 
     const uint8_t constant = identifier_constant(&parser.previous);
 
-    function(FuncTypeFunction);
+    function(FuncTypeMethod);
 
     emit_bytes(OpMethod, constant);
 }
