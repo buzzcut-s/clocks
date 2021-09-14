@@ -18,6 +18,8 @@ typedef enum
     OpAssignGlobal,
     OpReadUpvalue,
     OpAssignUpvalue,
+    OpSetField,
+    OpGetProperty,
     OpEqual,
     OpGreater,
     OpLess,

@@ -444,13 +444,28 @@ static void call(__attribute__((unused)) const bool can_assign)
     emit_bytes(OpCall, arg_count);
 }
 
+static void dot(const bool can_assign)
+{
+    consume(TokenIdentifier, "Expect property name after '.'.");
+
+    const uint8_t name = identifier_constant(&parser.previous);
+
+    if (can_assign && match(TokenEqual))
+    {
+        expression();
+        emit_bytes(OpSetField, name);
+    }
+    else
+        emit_bytes(OpGetProperty, name);
+}
+
 const ParseRule RULES[] = {
   [TokenLeftParen]    = {grouping, call, PrecCall},
   [TokenRightParen]   = {NULL, NULL, PrecNone},
   [TokenLeftBrace]    = {NULL, NULL, PrecNone},
   [TokenRightBrace]   = {NULL, NULL, PrecNone},
   [TokenComma]        = {NULL, NULL, PrecNone},
-  [TokenDot]          = {NULL, NULL, PrecNone},
+  [TokenDot]          = {NULL, dot, PrecCall},
   [TokenMinus]        = {unary, binary, PrecTerm},
   [TokenPlus]         = {NULL, binary, PrecTerm},
   [TokenSemicolon]    = {NULL, NULL, PrecNone},
