@@ -145,6 +145,7 @@ static void blacken_object(Obj* gray_obj)
         {
             ObjClass* klass = (ObjClass*)gray_obj;
             mark_object((Obj*)klass->name);
+            mark_table(&klass->methods);
             break;
         }
 
@@ -259,8 +260,12 @@ static void free_object(Obj* object)
             FREE(ObjUpvalue, object);
             break;
         case ObjTypeClass:
+        {
+            ObjClass* klass = (ObjClass*)object;
+            free_table(&klass->methods);
             FREE(ObjClass, object);
             break;
+        }
         case ObjTypeInstance:
         {
             ObjInstance* instance = (ObjInstance*)object;
