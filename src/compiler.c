@@ -80,7 +80,6 @@ typedef struct Compiler
 
 Parser    parser;
 Compiler* current = NULL;
-Chunk*    compiling_chunk;
 
 static const ParseRule* get_rule(TokenType type);
 
