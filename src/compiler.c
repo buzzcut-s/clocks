@@ -475,6 +475,12 @@ static void dot(const bool can_assign)
         expression();
         emit_bytes(OpSetField, name);
     }
+    else if (match(TokenLeftParen))
+    {
+        const uint8_t arg_count = argument_list();
+        emit_bytes(OpInvoke, name);
+        emit_byte(arg_count);
+    }
     else
         emit_bytes(OpGetProperty, name);
 }

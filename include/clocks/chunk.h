@@ -34,6 +34,7 @@ typedef enum
     OpJumpIfFalse,
     OpLoop,
     OpCall,
+    OpInvoke,
     OpClosure,
     OpCloseUpvalue,
     OpReturn,
