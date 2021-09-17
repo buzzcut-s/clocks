@@ -66,6 +66,7 @@ void init_vm()
     reset_stack();
     init_table(&vm.globals);
     init_table(&vm.strings);
+    vm.init_string        = NULL;
     vm.obj_head           = NULL;
     vm.open_upvalues_head = NULL;
     vm.gray_count         = 0;
@@ -74,6 +75,8 @@ void init_vm()
     vm.bytes_allocated    = 0;
     vm.next_gc_thresh     = 1024 * 1024;
 
+    vm.init_string = copy_string("init", 4);
+
     define_native("clock", clock_native);
 }
 
@@ -81,6 +84,7 @@ void free_vm()
 {
     free_table(&vm.globals);
     free_table(&vm.strings);
+    vm.init_string = NULL;
     free_objects();
 }
 
@@ -165,6 +169,17 @@ static bool call_value(const Value callee, const int arg_count)
             {
                 ObjClass* klass              = AS_CLASS(callee);
                 vm.stack_top[-arg_count - 1] = OBJ_VAL(new_instance(klass));
+
+                Value initializer;
+                if (table_find(&klass->methods, vm.init_string, &initializer))
+                    return call(AS_CLOSURE(initializer), arg_count);
+
+                if (arg_count != 0)
+                {
+                    runtime_error("Expected 0 arguments but got %d", arg_count);
+                    return false;
+                }
+
                 return true;
             }
             case ObjTypeBoundMethod:

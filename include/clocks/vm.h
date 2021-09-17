@@ -29,6 +29,8 @@ typedef struct
     size_t bytes_allocated;
     size_t next_gc_thresh;
 
+    ObjString* init_string;
+
     Obj*        obj_head;
     ObjUpvalue* open_upvalues_head;
 
