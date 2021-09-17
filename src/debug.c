@@ -173,6 +173,8 @@ int disassemble_instruction(const Chunk* chunk, const int offset)
         case OpReturn:
             return simple_instruction("OpReturn", offset);
 
+        case OpInherit:
+            return simple_instruction("OpInherit", offset);
         case OpClass:
             return constant_instruction("OpClass", chunk, offset);
         case OpMethod:

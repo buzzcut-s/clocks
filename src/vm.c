@@ -585,6 +585,20 @@ static InterpretResult run()
                 break;
             }
 
+            case OpInherit:
+            {
+                const Value superclass = peek(1);
+                if (!IS_CLASS(superclass))
+                {
+                    runtime_error("Superclass must be a class.");
+                    return InterpretRuntimeError;
+                }
+
+                ObjClass* subclass = AS_CLASS(peek(0));
+                table_copy(&AS_CLASS(superclass)->methods, &subclass->methods);
+                pop();
+                break;
+            }
             case OpClass:
                 push(OBJ_VAL(new_class(READ_STRING())));
                 break;

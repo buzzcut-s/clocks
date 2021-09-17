@@ -39,6 +39,7 @@ typedef enum
     OpCloseUpvalue,
     OpReturn,
     OpClass,
+    OpInherit,
     OpMethod,
 } OpCode;
 
