@@ -452,6 +452,15 @@ static InterpretResult run()
                 break;
             }
 
+            case OpReadSuper:
+            {
+                const ObjString* name       = READ_STRING();
+                const ObjClass*  superclass = AS_CLASS(pop());
+                if (!bind_method(superclass, name))
+                    return InterpretRuntimeError;
+                break;
+            }
+
             case OpEqual:
             {
                 const Value b = pop();

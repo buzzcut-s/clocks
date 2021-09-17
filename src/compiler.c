@@ -103,6 +103,8 @@ static int     resolve_upvalue(Compiler* compiler, const Token* name);
 
 static uint8_t argument_list();
 
+static Token synthetic_token(const char* text);
+
 static Chunk* current_chunk()
 {
     return &current->func->chunk;
@@ -497,6 +499,22 @@ static void this_fn(__attribute__((unused)) const bool can_assign)
     variable(false);
 }
 
+static void super_fn(__attribute__((unused)) const bool can_assign)
+{
+    if (current_class == NULL)
+        error("Can't use 'super' outside of a class.");
+    else if (!current_class->has_superclass)
+        error("Can't use 'super' in a class with no superclass");
+
+    consume(TokenDot, "Expect '.' after 'super'");
+    consume(TokenIdentifier, "Expect superclass method name.");
+    const uint8_t name = identifier_constant(&parser.previous);
+
+    named_variable(synthetic_token("this"), false);
+    named_variable(synthetic_token("super"), false);
+    emit_bytes(OpReadSuper, name);
+}
+
 const ParseRule RULES[] = {
   [TokenLeftParen]    = {grouping, call, PrecCall},
   [TokenRightParen]   = {NULL, NULL, PrecNone},
@@ -531,7 +549,7 @@ const ParseRule RULES[] = {
   [TokenOr]           = {NULL, or_fn, PrecNone},
   [TokenPrint]        = {NULL, NULL, PrecNone},
   [TokenReturn]       = {NULL, NULL, PrecNone},
-  [TokenSuper]        = {NULL, NULL, PrecNone},
+  [TokenSuper]        = {super_fn, NULL, PrecNone},
   [TokenThis]         = {this_fn, NULL, PrecNone},
   [TokenTrue]         = {literal, NULL, PrecNone},
   [TokenVar]          = {NULL, NULL, PrecNone},

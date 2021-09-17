@@ -127,6 +127,9 @@ int disassemble_instruction(const Chunk* chunk, const int offset)
         case OpGetProperty:
             return constant_instruction("OpGetProperty", chunk, offset);
 
+        case OpReadSuper:
+            return constant_instruction("OpReadSuper", chunk, offset);
+
         case OpEqual:
             return simple_instruction("OpEqual", offset);
         case OpGreater:
