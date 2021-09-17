@@ -82,6 +82,7 @@ typedef struct Compiler
 typedef struct ClassCompiler
 {
     struct ClassCompiler* enclosing;
+    bool                  has_superclass;
 } ClassCompiler;
 
 Parser         parser;
@@ -804,6 +805,14 @@ static void method()
     emit_bytes(OpMethod, constant);
 }
 
+static Token synthetic_token(const char* text)
+{
+    Token token;
+    token.start  = text;
+    token.length = (int)strlen(text);
+    return token;
+}
+
 static void class_declaration()
 {
     consume(TokenIdentifier, "Expect class name.");
@@ -816,16 +825,23 @@ static void class_declaration()
     define_variable(name_constant);
 
     ClassCompiler class_compiler;
-    class_compiler.enclosing = current_class;
-    current_class            = &class_compiler;
+    class_compiler.has_superclass = false;
+    class_compiler.enclosing      = current_class;
+    current_class                 = &class_compiler;
 
     if (match(TokenLess))
     {
+        class_compiler.has_superclass = true;
+
         consume(TokenIdentifier, "Expect superclass name.");
         variable(false);
 
         if (identifiers_equal(&class_name, &parser.previous))
             error("A class can't inherit from itself.");
+
+        begin_scope();
+        add_local(synthetic_token("super"));
+        define_variable(0);
 
         named_variable(class_name, false);
         emit_byte(OpInherit);
@@ -839,6 +855,9 @@ static void class_declaration()
 
     consume(TokenRightBrace, "Expect '}' after class body.");
     emit_byte(OpPop);
+
+    if (class_compiler.has_superclass)
+        end_scope();
 
     current_class = current_class->enclosing;
 }
