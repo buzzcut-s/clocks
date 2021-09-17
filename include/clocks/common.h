@@ -16,6 +16,8 @@
 
 #define OPTIMIZED_TABLE_FIND_ENTRY
 
+#define NAN_BOXING
+
 #define UINT8_COUNT (UINT8_MAX + 1)
 
 #endif  // COMMON_H

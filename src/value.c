@@ -8,6 +8,11 @@
 
 bool values_equal(const Value a, const Value b)
 {
+#ifdef NAN_BOXING
+    if (IS_NUMBER(a) && IS_NUMBER(b))
+        return AS_NUMBER(a) == AS_NUMBER(b);
+    return a == b;
+#else
     if (a.type != b.type)
         return false;
 
@@ -25,6 +30,7 @@ bool values_equal(const Value a, const Value b)
         default:
             return false;
     }
+#endif
 }
 
 void init_value_array(ValueArray* array)
@@ -57,6 +63,16 @@ void write_value_array(ValueArray* array, const Value value)
 
 void print_value(const Value value)
 {
+#ifdef NAN_BOXING
+    if (IS_BOOL(value))
+        printf(AS_BOOL(value) ? "true" : "false");
+    else if (IS_NIL(value))
+        printf("nil");
+    else if (IS_NUMBER(value))
+        printf("%g", AS_NUMBER(value));
+    else if (IS_OBJ(value))
+        print_object(&value);
+#else
     switch (value.type)
     {
         case ValBool:
@@ -72,4 +88,5 @@ void print_value(const Value value)
             print_object(&value);
             break;
     }
+#endif
 }
