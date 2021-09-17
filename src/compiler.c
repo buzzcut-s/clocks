@@ -944,6 +944,9 @@ static void return_statement()
         emit_return();
     else
     {
+        if (current->type == FuncTypeInitializer)
+            error("Can't return a value from an initializer.");
+
         expression();
         consume(TokenSemicolon, "Expect ';' after return value.");
         emit_byte(OpReturn);
