@@ -65,6 +65,7 @@ typedef enum
     FuncTypeFunction,
     FuncTypeMethod,
     FuncTypeScript,
+    FuncTypeInitializer,
 } FunctionType;
 
 typedef struct Compiler
@@ -201,7 +202,11 @@ static void emit_loop(const int loop_start)
 
 static void emit_return()
 {
-    emit_byte(OpNil);
+    if (current->type == FuncTypeInitializer)
+        emit_bytes(OpReadLocal, 0);
+    else
+        emit_byte(OpNil);
+
     emit_byte(OpReturn);
 }
 
@@ -783,7 +788,11 @@ static void method()
 
     const uint8_t constant = identifier_constant(&parser.previous);
 
-    function(FuncTypeMethod);
+    FunctionType type = FuncTypeMethod;
+    if (parser.previous.length == 4 && memcmp(parser.previous.start, "init", 4) == 0)
+        type = FuncTypeInitializer;
+
+    function(type);
 
     emit_bytes(OpMethod, constant);
 }
