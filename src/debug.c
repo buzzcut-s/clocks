@@ -70,11 +70,11 @@ static int closure_instruction(const Chunk* chunk, int offset)
     return offset;
 }
 
-static int invoke_instruction(const Chunk* chunk, int offset)
+static int invoke_instruction(const char* name, const Chunk* chunk, int offset)
 {
     const uint8_t constant  = chunk->code[offset + 1];
     const uint8_t arg_count = chunk->code[offset + 2];
-    printf("%-16s (%d args) %4d '", "OpInvoke", arg_count, constant);
+    printf("%-16s (%d args) %4d '", name, arg_count, constant);
     print_value(chunk->constants.values[constant]);
     printf("'\n");
     return offset + 3;
@@ -165,7 +165,9 @@ int disassemble_instruction(const Chunk* chunk, const int offset)
         case OpCall:
             return byte_instruction("OpCall", chunk, offset);
         case OpInvoke:
-            return invoke_instruction(chunk, offset);
+            return invoke_instruction("OpInvoke", chunk, offset);
+        case OpSuperInvoke:
+            return invoke_instruction("OpSuperInvoke", chunk, offset);
 
         case OpClosure:
             return closure_instruction(chunk, offset);

@@ -511,8 +511,19 @@ static void super_fn(__attribute__((unused)) const bool can_assign)
     const uint8_t name = identifier_constant(&parser.previous);
 
     named_variable(synthetic_token("this"), false);
-    named_variable(synthetic_token("super"), false);
-    emit_bytes(OpReadSuper, name);
+
+    if (match(TokenLeftParen))
+    {
+        const uint8_t arg_count = argument_list();
+        named_variable(synthetic_token("super"), false);
+        emit_bytes(OpSuperInvoke, name);
+        emit_byte(arg_count);
+    }
+    else
+    {
+        named_variable(synthetic_token("super"), false);
+        emit_bytes(OpReadSuper, name);
+    }
 }
 
 const ParseRule RULES[] = {

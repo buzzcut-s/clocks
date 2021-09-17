@@ -556,6 +556,18 @@ static InterpretResult run()
                 frame = &vm.frames[vm.frame_count - 1];
                 break;
             }
+            case OpSuperInvoke:
+            {
+                const ObjString* method     = READ_STRING();
+                const int        arg_count  = READ_BYTE();
+                const ObjClass*  superclass = AS_CLASS(pop());
+
+                if (!invoke_from_class(superclass, method, arg_count))
+                    return InterpretRuntimeError;
+
+                frame = &vm.frames[vm.frame_count - 1];
+                break;
+            }
 
             case OpClosure:
             {
