@@ -78,8 +78,14 @@ typedef struct Compiler
     int              scope_depth;
 } Compiler;
 
-Parser    parser;
-Compiler* current = NULL;
+typedef struct ClassCompiler
+{
+    struct ClassCompiler* enclosing;
+} ClassCompiler;
+
+Parser         parser;
+Compiler*      current       = NULL;
+ClassCompiler* current_class = NULL;
 
 static const ParseRule* get_rule(TokenType type);
 
@@ -787,6 +793,10 @@ static void class_declaration()
     emit_bytes(OpClass, name_constant);
     define_variable(name_constant);
 
+    ClassCompiler class_compiler;
+    class_compiler.enclosing = current_class;
+    current_class            = &class_compiler;
+
     named_variable(class_name, false);
     consume(TokenLeftBrace, "Expect '{' before class body.");
 
@@ -795,6 +805,8 @@ static void class_declaration()
 
     consume(TokenRightBrace, "Expect '}' after class body.");
     emit_byte(OpPop);
+
+    current_class = current_class->enclosing;
 }
 
 static void print_statement()
