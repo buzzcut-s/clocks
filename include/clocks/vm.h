@@ -1,6 +1,7 @@
 #ifndef VM_H
 #define VM_H
 
+#include "common.h"
 #include "object.h"
 #include "table.h"
 #include "value.h"
@@ -51,8 +52,15 @@ extern VM vm;
 void init_vm();
 void free_vm();
 
-void  push(Value value);
+void push(Value value);
+
+#ifdef OPTIMIZED_POP
+Value pop_and_return();
+void  pop();
+#else
+Value pop_and_return();
 Value pop();
+#endif
 
 InterpretResult interpret(const char* source);
 

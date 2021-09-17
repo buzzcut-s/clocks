@@ -94,11 +94,29 @@ void push(const Value value)
     vm.stack_top++;
 }
 
+#ifdef OPTIMIZED_POP
+Value pop_and_return()
+{
+    vm.stack_top--;
+    return *vm.stack_top;
+}
+
+void pop()
+{
+    vm.stack_top--;
+}
+#else
+Value pop_and_return()
+{
+    return pop();
+}
+
 Value pop()
 {
     vm.stack_top--;
     return *vm.stack_top;
 }
+#endif
 
 static Value peek(const int distance)
 {
@@ -305,8 +323,8 @@ static InterpretResult run()
             runtime_error("Operands must be numbers");  \
             return InterpretRuntimeError;               \
         }                                               \
-        const double b = AS_NUMBER(pop());              \
-        const double a = AS_NUMBER(pop());              \
+        const double b = AS_NUMBER(pop_and_return());   \
+        const double a = AS_NUMBER(pop_and_return());   \
         push(value_type(a op b));                       \
     }                                                   \
     while (false)
@@ -422,7 +440,7 @@ static InterpretResult run()
                 ObjInstance* instance = AS_INSTANCE(peek(1));
                 table_insert(&instance->fields, READ_STRING(), peek(0));
 
-                Value value = pop();
+                Value value = pop_and_return();
                 pop();
                 push(value);
                 break;
@@ -456,7 +474,7 @@ static InterpretResult run()
             case OpReadSuper:
             {
                 const ObjString* name       = READ_STRING();
-                const ObjClass*  superclass = AS_CLASS(pop());
+                const ObjClass*  superclass = AS_CLASS(pop_and_return());
 
                 if (!bind_method(superclass, name))
                     return InterpretRuntimeError;
@@ -466,8 +484,8 @@ static InterpretResult run()
 
             case OpEqual:
             {
-                const Value b = pop();
-                const Value a = pop();
+                const Value b = pop_and_return();
+                const Value a = pop_and_return();
                 push(BOOL_VAL(values_equal(a, b)));
                 break;
             }
@@ -502,7 +520,7 @@ static InterpretResult run()
                 break;
 
             case OpNot:
-                push(BOOL_VAL(is_falsey(pop())));
+                push(BOOL_VAL(is_falsey(pop_and_return())));
                 break;
 
             case OpNegate:
@@ -511,11 +529,11 @@ static InterpretResult run()
                     runtime_error("Operand must be a number");
                     return InterpretRuntimeError;
                 }
-                push(NUMBER_VAL(-AS_NUMBER(pop())));
+                push(NUMBER_VAL(-AS_NUMBER(pop_and_return())));
                 break;
 
             case OpPrint:
-                print_value(pop());
+                print_value(pop_and_return());
                 printf("\n");
                 break;
 
@@ -563,7 +581,7 @@ static InterpretResult run()
             {
                 const ObjString* method     = READ_STRING();
                 const int        arg_count  = READ_BYTE();
-                const ObjClass*  superclass = AS_CLASS(pop());
+                const ObjClass*  superclass = AS_CLASS(pop_and_return());
 
                 if (!invoke_from_class(superclass, method, arg_count))
                     return InterpretRuntimeError;
@@ -594,7 +612,7 @@ static InterpretResult run()
 
             case OpReturn:
             {
-                const Value result = pop();
+                const Value result = pop_and_return();
 
                 close_upvalues(frame->slots);
                 vm.frame_count--;
