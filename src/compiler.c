@@ -476,6 +476,12 @@ static void dot(const bool can_assign)
 
 static void this_fn(__attribute__((unused)) const bool can_assign)
 {
+    if (current_class == NULL)
+    {
+        error("Can't use 'this' outside of a class.");
+        return;
+    }
+
     variable(false);
 }
 
