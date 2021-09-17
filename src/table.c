@@ -2,6 +2,7 @@
 
 #include <string.h>
 
+#include <clocks/common.h>
 #include <clocks/memory.h>
 #include <clocks/object.h>
 
@@ -22,8 +23,13 @@ void free_table(Table* table)
 
 static Entry* find_entry(Entry* entries, const int capacity, const ObjString* key)
 {
-    uint32_t index     = key->hash % capacity;
-    Entry*   tombstone = NULL;
+#ifdef OPTIMIZED_TABLE_FIND_ENTRY
+    uint32_t index = key->hash & (capacity - 1);
+#else
+    uint32_t index = key->hash % capacity;
+#endif
+
+    Entry* tombstone = NULL;
 
     while (true)
     {
@@ -39,8 +45,11 @@ static Entry* find_entry(Entry* entries, const int capacity, const ObjString* ke
         }
         else if (entry->key == key)
             return entry;
-
+#ifdef OPTIMIZED_TABLE_FIND_ENTRY
+        index = (index + 1) & (capacity - 1);
+#else
         index = (index + 1) % capacity;
+#endif
     }
 }
 
@@ -138,7 +147,12 @@ ObjString* table_find_string(const Table* table, const char* chars,
     if (table->count == 0)
         return NULL;
 
+#ifdef OPTIMIZED_TABLE_FIND_ENTRY
+    uint32_t index = hash & (table->capacity - 1);
+#else
     uint32_t index = hash % table->capacity;
+#endif
+
     while (true)
     {
         const Entry* entry = &table->entries[index];
@@ -154,8 +168,11 @@ ObjString* table_find_string(const Table* table, const char* chars,
         {
             return entry->key;
         }
-
+#ifdef OPTIMIZED_TABLE_FIND_ENTRY
+        index = (index + 1) & (table->capacity - 1);
+#else
         index = (index + 1) % table->capacity;
+#endif
     }
 }
 
