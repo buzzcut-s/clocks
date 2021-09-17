@@ -376,6 +376,7 @@ static InterpretResult run()
                     runtime_error("Undefined variable '%s'.", name->chars);
                     return InterpretRuntimeError;
                 }
+
                 push(value);
                 break;
             }
@@ -456,8 +457,10 @@ static InterpretResult run()
             {
                 const ObjString* name       = READ_STRING();
                 const ObjClass*  superclass = AS_CLASS(pop());
+
                 if (!bind_method(superclass, name))
                     return InterpretRuntimeError;
+
                 break;
             }
 
@@ -592,6 +595,7 @@ static InterpretResult run()
             case OpReturn:
             {
                 const Value result = pop();
+
                 close_upvalues(frame->slots);
                 vm.frame_count--;
                 if (vm.frame_count == 0)
