@@ -794,9 +794,10 @@ static void method()
 
     const uint8_t constant = identifier_constant(&parser.previous);
 
-    FunctionType type = FuncTypeMethod;
-    if (parser.previous.length == 4 && memcmp(parser.previous.start, "init", 4) == 0)
-        type = FuncTypeInitializer;
+    FunctionType type = (parser.previous.length == 4
+                         && memcmp(parser.previous.start, "init", 4) == 0)
+                          ? FuncTypeInitializer
+                          : FuncTypeMethod;
 
     function(type);
 
