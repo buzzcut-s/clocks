@@ -28,7 +28,7 @@ print fib(35);
 - Inheritance (Superclasses)
 - The Standard Library
 
-# Build
+# Release Build
 clocks is built using CMake and requires at least C11. clang-tidy and clang-format config files are also provided.
 
 clocks requires no external dependencies.
@@ -38,7 +38,7 @@ git clone https://github.com/buzzcut-s/clocks.git
 cd clocks/
 mkdir build
 cd build/
-cmake ..
+cmake -DCMAKE_BUILD_TYPE=Release ..
 cmake --build .
 ```
 
