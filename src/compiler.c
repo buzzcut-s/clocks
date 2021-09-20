@@ -183,11 +183,13 @@ static void emit_bytes(const uint8_t byte1, const uint8_t byte2)
     emit_byte(byte2);
 }
 
+#define BACKPATCH_PLACEHOLDER 0xFF
+
 static int emit_jump(const uint8_t instruction)
 {
     emit_byte(instruction);
-    emit_byte(0xff);
-    emit_byte(0xff);
+    emit_byte(BACKPATCH_PLACEHOLDER);
+    emit_byte(BACKPATCH_PLACEHOLDER);
     return current_chunk()->count - 2;
 }
 
@@ -199,9 +201,21 @@ static void emit_loop(const int loop_start)
     if (offset > UINT16_MAX)
         error("Loop body too large.");
 
-    emit_byte((offset >> 8) & 0xff);
-    emit_byte(offset & 0xff);
+    emit_byte((offset >> 8) & BACKPATCH_PLACEHOLDER);
+    emit_byte(offset & BACKPATCH_PLACEHOLDER);
 }
+
+static void backpatch(const int offset)
+{
+    const int jump = current_chunk()->count - offset - 2;
+    if (jump > UINT16_MAX)
+        error("Too much code to jump over.");
+
+    current_chunk()->code[offset]     = (jump >> 8) & BACKPATCH_PLACEHOLDER;
+    current_chunk()->code[offset + 1] = (jump & BACKPATCH_PLACEHOLDER);
+}
+
+#undef BACKPATCH_PLACEHOLDER
 
 static void emit_return()
 {
@@ -227,16 +241,6 @@ static uint8_t make_constant(const Value value)
 static void emit_constant(const Value value)
 {
     emit_bytes(OpConstant, make_constant(value));
-}
-
-static void patch_jump(const int offset)
-{
-    const int jump = current_chunk()->count - offset - 2;
-    if (jump > UINT16_MAX)
-        error("Too much code to jump over.");
-
-    current_chunk()->code[offset]     = (jump >> 8) & 0xff;
-    current_chunk()->code[offset + 1] = (jump & 0xff);
 }
 
 static void init_compiler(Compiler* compiler, const FunctionType type)
@@ -446,7 +450,7 @@ static void and_fn(__attribute__((unused)) const bool can_assign)
     int end_jump = emit_jump(OpJumpIfFalse);
     emit_byte(OpPop);
     parse_precedence(PrecAnd);
-    patch_jump(end_jump);
+    backpatch(end_jump);
 }
 
 static void or_fn(__attribute__((unused)) const bool can_assign)
@@ -454,11 +458,11 @@ static void or_fn(__attribute__((unused)) const bool can_assign)
     const int else_jump = emit_jump(OpJumpIfFalse);
     const int end_jump  = emit_jump(OpJump);
 
-    patch_jump(else_jump);
+    backpatch(else_jump);
     emit_byte(OpPop);
 
     parse_precedence(PrecOr);
-    patch_jump(end_jump);
+    backpatch(end_jump);
 }
 
 static void call(__attribute__((unused)) const bool can_assign)
@@ -917,13 +921,13 @@ static void if_statement()
     statement();
 
     const int else_jump = emit_jump(OpJump);
-    patch_jump(then_jump);
+    backpatch(then_jump);
     emit_byte(OpPop);
 
     if (match(TokenElse))
         statement();
 
-    patch_jump(else_jump);
+    backpatch(else_jump);
 }
 
 static void while_statement()
@@ -939,7 +943,7 @@ static void while_statement()
     statement();
     emit_loop(loop_start);
 
-    patch_jump(exit_jump);
+    backpatch(exit_jump);
     emit_byte(OpPop);
 }
 
@@ -987,7 +991,7 @@ static void for_statement()
         // this will cause it to jump up to the increment expression
         // instead of the top of the loop like it does when there is no increment.
         loop_start = incr_start;
-        patch_jump(body_jump);
+        backpatch(body_jump);
     }
 
     statement();
@@ -995,7 +999,7 @@ static void for_statement()
 
     if (exit_jump != -1)
     {
-        patch_jump(exit_jump);
+        backpatch(exit_jump);
         emit_byte(OpPop);  // Condition
     }
 
