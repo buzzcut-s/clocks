@@ -45,14 +45,22 @@ static ObjString* allocate_string(char* chars, const int length, uint32_t hash)
 
 static uint32_t hash_string(const char* key, int length)
 {
-    const uint32_t fnv_offset_basis = 2166136261U;
-    const uint32_t fnv_prime        = 16777619U;
+#define FNV_OFFSET_BASIS 2166136261U
 
-    uint32_t hash = fnv_offset_basis;
+#ifndef FNV_GCC_OPTIMIZATION
+#define FNV_PRIME 16777619U
+#endif
+
+    uint32_t hash = FNV_OFFSET_BASIS;
     for (int i = 0; i < length; i++)
     {
         hash ^= (uint8_t)key[i];
-        hash *= fnv_prime;
+
+#ifdef FNV_GCC_OPTIMIZATION  // http://www.isthe.com/chongo/tech/comp/fnv/#gcc-O3
+        hash += (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
+#else
+        hash *= FNV_PRIME;
+#endif
     }
     return hash;
 }

@@ -19,6 +19,7 @@
 #define OPTIMIZED_TABLE_FIND_ENTRY
 #define NAN_BOXING
 #define OPTIMIZED_POP
+#define FNV_GCC_OPTIMIZATION
 #endif
 
 #define UINT8_COUNT (UINT8_MAX + 1)
