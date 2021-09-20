@@ -36,4 +36,3 @@ while (sum < 100000000)
 
 print clock() - start;
 print sum;
- 
