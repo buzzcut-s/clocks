@@ -40,14 +40,16 @@ mkdir build
 cd build/
 cmake -DCMAKE_BUILD_TYPE=Release ..
 cmake --build .
+cd src/
 ```
+
+The binary is built in the ```clocks/build/src/``` directory
 
 # Usage - REPL
 clocks provides a REPL environment to play around in. 
 
 To run:
 ``` 
-cd src/
 ./clocks
 ```
 After executing, use the ```clocks >``` shell to provide input.
@@ -61,7 +63,7 @@ To compile and run a file called hashmap_bench.lc:
 ```
 
 # (extra)
-You can pass in a a different const char* argument to the ```linenoise("clocks > ")``` call at ```main.cpp:16:30```[ (here) ](https://github.com/buzzcut-s/clocks/blob/main/src/main.cpp#L16) to change the shell prompt from ```clocks >``` to anything else that your heart desires :D
+You can pass in a a different const char* argument to the ```linenoise("clocks > ")``` call at ```main.cpp:16:30```[ (here) ](https://github.com/buzzcut-s/clocks/blob/main/src/main.c#L16) to change the shell prompt from ```clocks >``` to anything else that your heart desires :D
 
 Debugging can be enabled by defining the ```CLOCKS_DEBUG``` macro. Debugging can also be toggled at a granular level for different components individually (Compiler, Virtual Machine, GC). See ```common.h``` for more details.
 
