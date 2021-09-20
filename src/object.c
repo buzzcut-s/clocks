@@ -23,8 +23,8 @@ static Obj* allocate_obj(const size_t size, const ObjType type)
     vm.obj_head  = object;
 
 #ifdef DEBUG_LOG_GC
-    const char* types[] = {"ObjString", "ObjFunction", "ObjNative", "ObjClosure",
-                           "ObjUpvalue", "ObjClass", "ObjTypeInstance", "ObjTypeBoundMethod"};
+    static const char* types[] = {"ObjString", "ObjFunction", "ObjNative", "ObjClosure",
+                                  "ObjUpvalue", "ObjClass", "ObjTypeInstance", "ObjTypeBoundMethod"};
     printf("%p allocate %zu bytes for %s\n", (void*)object, size, types[type]);
 #endif
 

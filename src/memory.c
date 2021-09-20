@@ -51,6 +51,7 @@ void mark_object(Obj* object)
 {
     if (object == NULL || object->is_marked)
         return;
+
 #ifdef DEBUG_LOG_GC
     printf("%p mark ", (void*)object);
     print_value(OBJ_VAL(object));
@@ -233,8 +234,8 @@ void collect_garbage()
 static void free_object(Obj* object)
 {
 #ifdef DEBUG_LOG_GC
-    const char* types[] = {"ObjString", "ObjFunction", "ObjNative", "ObjClosure",
-                           "ObjUpvalue", "ObjClass", "ObjTypeInstance", "ObjTypeBoundMethod"};
+    static const char* types[] = {"ObjString", "ObjFunction", "ObjNative", "ObjClosure",
+                                  "ObjUpvalue", "ObjClass", "ObjTypeInstance", "ObjTypeBoundMethod"};
     printf("%p free type %s\n", (void*)object, types[object->type]);
 #endif
 
