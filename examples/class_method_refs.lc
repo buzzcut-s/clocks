@@ -1,0 +1,15 @@
+class Person 
+{
+    say_name() 
+    {
+        print this.name;
+    }
+}
+
+var the_son_of_darkness = Person();
+the_son_of_darkness.name = "Anomander Rake";
+
+var method = the_son_of_darkness.say_name;
+method(); 
+
+// Prints "Anomander Rake"

@@ -1,0 +1,16 @@
+// Closures hold on to the variable as long as needed, even after the function that declares the variable has returned
+
+fun outer() 
+{
+    var x = "outside";
+    fun inner() 
+    {
+        print x;
+    }
+    return inner;
+}
+
+var closure = outer();
+closure();
+
+// Prints "outside"

@@ -67,6 +67,11 @@ Debugging can be enabled by defining the ```CLOCKS_DEBUG``` macro. Debugging can
 
 Various optimizations can also be toggled using the ```CLOCKS_OPTIMIZATION``` macro. Individual toggle macros are also provided. See ```common.h``` for more details.
 
+# Examples
+See the examples directory.
+
+Also checkout the extensive testing suite written by Bob [here](https://github.com/munificent/craftinginterpreters/tree/master/test).
+
 # License
 clocks is licensed under the MIT License, © 2021 Piyush Kumar. See [LICENSE](https://github.com/buzzcut-s/clocks/blob/main/LICENSE) for more details.
 

@@ -1,0 +1,25 @@
+// Benchmark tail-call fibonacci function
+
+fun fib_impl(n, a, b)
+{
+    if (n == 0) 
+    {
+        return a;
+    }
+    
+    if (n == 1) 
+    {
+        return b;
+    }
+
+    return fib_impl(n - 1, b, a + b);
+}
+
+fun fib(n) 
+{
+    return fib_impl(n, 0, 1);
+}
+
+var t0 = clock();
+print fib(35);
+print clock() - t0;

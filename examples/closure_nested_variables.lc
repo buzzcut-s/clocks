@@ -1,0 +1,28 @@
+// Lox supports accessing local variables declared in any enclosing scope
+
+fun outer() 
+{
+    var x = "value";
+    fun middle() 
+    {
+        fun inner() 
+        {
+            print x;
+        }
+
+        print "create inner closure";
+        return inner;
+    }
+
+    print "return from outer";
+    return middle;
+}
+
+var mid = outer();
+var in = mid();
+in();
+
+// Prints :
+// return from outer
+// create inner closure
+// value
