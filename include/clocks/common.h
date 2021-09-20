@@ -10,7 +10,7 @@
 
 #ifdef CLOCKS_DEBUG
 #define DEBUG_PRINT_CODE       // Prints resulting bytecode from the compiler
-#define DEBUG_TRACE_EXECUTION  // Print stack traces from the VM
+#define DEBUG_TRACE_EXECUTION  // Print execution trace from the VM
 #define DEBUG_STRESS_GC        // Stress GC by collecting before every allocation
 #define DEBUG_LOG_GC           // Allocation information (bytes, type) and GC phases (mark, blacken)
 #endif
