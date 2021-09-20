@@ -589,7 +589,7 @@ static void parse_precedence(const Precedence prec)
         return;
     }
 
-    const bool can_assign = prec <= PrecAssignment;
+    const bool can_assign = (prec <= PrecAssignment);
     prefix_rule(can_assign);
 
     while (prec <= get_rule(parser.current.type)->prec)
