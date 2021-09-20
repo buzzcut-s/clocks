@@ -471,7 +471,7 @@ static InterpretResult run()
                 break;
             }
 
-            case OpReadSuper:
+            case OpGetSuper:
             {
                 const ObjString* name       = READ_STRING();
                 const ObjClass*  superclass = AS_CLASS(pop_and_return());

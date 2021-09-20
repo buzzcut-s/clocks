@@ -526,7 +526,7 @@ static void super_fn(__attribute__((unused)) const bool can_assign)
     else
     {
         named_variable(synthetic_token("super"), false);
-        emit_bytes(OpReadSuper, name);
+        emit_bytes(OpGetSuper, name);
     }
 }
 

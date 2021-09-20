@@ -20,7 +20,7 @@ typedef enum
     OpAssignUpvalue,
     OpSetField,
     OpGetProperty,
-    OpReadSuper,
+    OpGetSuper,
     OpEqual,
     OpGreater,
     OpLess,
