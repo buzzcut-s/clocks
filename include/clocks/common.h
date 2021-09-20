@@ -5,14 +5,14 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define CLOCKS_DEBUG
+// #define CLOCKS_DEBUG
 #define CLOCKS_OPTIMIZATIONS
 
 #ifdef CLOCKS_DEBUG
-#define DEBUG_PRINT_CODE
-#define DEBUG_TRACE_EXECUTION
-#define DEBUG_STRESS_GC
-#define DEBUG_LOG_GC
+#define DEBUG_PRINT_CODE       // Prints resulting bytecode from the compiler
+#define DEBUG_TRACE_EXECUTION  // Print stack traces from the VM
+#define DEBUG_STRESS_GC        // Stress GC by collecting before every allocation
+#define DEBUG_LOG_GC           // Allocation information (bytes, type) and GC phases (mark, blacken)
 #endif
 
 #ifdef CLOCKS_OPTIMIZATIONS
