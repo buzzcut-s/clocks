@@ -51,5 +51,6 @@ print_tail(list);
 // 1
 // 2
 // 21 
+// 3
 // tail
 // 3
