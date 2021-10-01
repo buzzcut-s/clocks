@@ -264,8 +264,12 @@ static void free_object(Obj* object)
         case ObjTypeString:
         {
             ObjString* string = (ObjString*)object;
+#ifdef OBJECT_STRING_FLEXIBLE_ARRAY
+            reallocate(object, sizeof(ObjString) + string->length + 1, 0);
+#else
             FREE_ARRAY(char, string->chars, string->length + 1);
             FREE(ObjString, object);
+#endif
             break;
         }
         case ObjTypeFunction:

@@ -151,12 +151,20 @@ static void concatenate()
 
     const int length = a->length + b->length;
 
+#ifdef OBJECT_STRING_FLEXIBLE_ARRAY
+    ObjString* res = make_string(length);
+    memcpy(res->chars, a->chars, a->length);
+    memcpy(res->chars + a->length, b->chars, b->length);
+    res->hash          = hash_string(res->chars, length);
+    res->chars[length] = '\0';
+#else
     char* chars = ALLOCATE(char, length + 1);
     memcpy(chars, a->chars, a->length);
     memcpy(chars + a->length, b->chars, b->length);
     chars[length] = '\0';
 
     ObjString* res = take_string(chars, length);
+#endif
     pop();
     pop();
     push(OBJ_VAL(res));

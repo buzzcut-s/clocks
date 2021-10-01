@@ -36,7 +36,8 @@ static Obj* allocate_obj(const size_t size, const ObjType type)
     return object;
 }
 
-static ObjString* allocate_string(char* chars, const int length, uint32_t hash)
+#ifndef OBJECT_STRING_FLEXIBLE_ARRAY
+static ObjString* allocate_string(char* chars, const int length, const uint32_t hash)
 {
     ObjString* string = ALLOCATE_OBJ(ObjString, ObjTypeString);
     string->length    = length;
@@ -47,20 +48,18 @@ static ObjString* allocate_string(char* chars, const int length, uint32_t hash)
     pop();
     return string;
 }
+#endif
 
-static uint32_t hash_string(const char* key, int length)
+uint32_t hash_string(const char* key, const int length)
 {
 #define FNV_OFFSET_BASIS 2166136261U
-
 #ifndef FNV_GCC_OPTIMIZATION
 #define FNV_PRIME 16777619U
 #endif
-
     uint32_t hash = FNV_OFFSET_BASIS;
     for (int i = 0; i < length; i++)
     {
         hash ^= (uint8_t)key[i];
-
 #ifdef FNV_GCC_OPTIMIZATION  // http://www.isthe.com/chongo/tech/comp/fnv/#gcc-O3
         hash += (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
 #else
@@ -69,6 +68,15 @@ static uint32_t hash_string(const char* key, int length)
     }
     return hash;
 }
+
+#ifdef OBJECT_STRING_FLEXIBLE_ARRAY
+ObjString* make_string(const int length)
+{
+    ObjString* string = (ObjString*)allocate_obj(sizeof(ObjString) + length + 1, ObjTypeString);
+    string->length    = length;
+    return string;
+}
+#endif
 
 ObjString* take_string(char* chars, const int length)
 {
@@ -81,7 +89,20 @@ ObjString* take_string(char* chars, const int length)
         return interned;
     }
 
+#ifdef OBJECT_STRING_FLEXIBLE_ARRAY
+    ObjString* string = make_string(length);
+    memcpy(string->chars, chars, length);
+    string->hash          = hash;
+    string->chars[length] = '\0';
+
+    push(OBJ_VAL(string));
+    table_insert(&vm.strings, string, NIL_VAL);
+    pop();
+
+    return string;
+#else
     return allocate_string(chars, length, hash);
+#endif
 }
 
 ObjString* copy_string(const char* chars, int length)
@@ -92,11 +113,24 @@ ObjString* copy_string(const char* chars, int length)
     if (interned != NULL)
         return interned;
 
+#ifdef OBJECT_STRING_FLEXIBLE_ARRAY
+    ObjString* string = make_string(length);
+    memcpy(string->chars, chars, length);
+    string->hash          = hash;
+    string->chars[length] = '\0';
+
+    push(OBJ_VAL(string));
+    table_insert(&vm.strings, string, NIL_VAL);
+    pop();
+
+    return string;
+#else
     char* heap_chars = ALLOCATE(char, length + 1);
     memcpy(heap_chars, chars, length);
     heap_chars[length] = '\0';
 
     return allocate_string(heap_chars, length, hash);
+#endif
 }
 
 ObjFunction* new_function()

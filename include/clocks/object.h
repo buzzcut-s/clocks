@@ -25,7 +25,7 @@ struct Obj
 #ifdef GC_OPTIMIZE_CLEARING_MARK
     bool mark;
 #else
-    bool is_marked;
+    bool  is_marked;
 #endif
     struct Obj* next;
 };
@@ -42,8 +42,12 @@ struct ObjString
 {
     Obj      obj;
     int      length;
-    char*    chars;
     uint32_t hash;
+#ifdef OBJECT_STRING_FLEXIBLE_ARRAY
+    char chars[];
+#else
+    char* chars;
+#endif
 };
 
 #define IS_STRING(value)  is_obj_type(value, ObjTypeString)
@@ -52,6 +56,9 @@ struct ObjString
 
 ObjString* take_string(char* chars, int length);
 ObjString* copy_string(const char* chars, int length);
+
+ObjString* make_string(int length);
+uint32_t   hash_string(const char* key, int length);
 
 typedef struct
 {
