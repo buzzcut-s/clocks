@@ -496,6 +496,9 @@ static InterpretResult run()
             {
                 if (!IS_INSTANCE(peek(1)))
                 {
+#ifdef VM_CACHE_IP
+                    frame->ip = ip;
+#endif
                     runtime_error("Only instances have properties.");
                     return InterpretRuntimeError;
                 }
@@ -513,6 +516,9 @@ static InterpretResult run()
             {
                 if (!IS_INSTANCE(peek(0)))
                 {
+#ifdef VM_CACHE_IP
+                    frame->ip = ip;
+#endif
                     runtime_error("Only instances have properties.");
                     return InterpretRuntimeError;
                 }
@@ -527,7 +533,9 @@ static InterpretResult run()
                     push(value);
                     break;
                 }
-
+#ifdef VM_CACHE_IP
+                frame->ip = ip;
+#endif
                 if (!bind_method(instance->klass, name))
                     return InterpretRuntimeError;
 
@@ -538,7 +546,9 @@ static InterpretResult run()
             {
                 const ObjString* name       = READ_STRING();
                 const ObjClass*  superclass = AS_CLASS(pop_and_return());
-
+#ifdef VM_CACHE_IP
+                frame->ip = ip;
+#endif
                 if (!bind_method(superclass, name))
                     return InterpretRuntimeError;
 
@@ -657,11 +667,16 @@ static InterpretResult run()
             {
                 const ObjString* method    = READ_STRING();
                 const int        arg_count = READ_BYTE();
-
+#ifdef VM_CACHE_IP
+                frame->ip = ip;
+#endif
                 if (!invoke(method, arg_count))
                     return InterpretRuntimeError;
 
                 frame = &vm.frames[vm.frame_count - 1];
+#ifdef VM_CACHE_IP
+                ip = frame->ip;
+#endif
                 break;
             }
             case OpSuperInvoke:
@@ -669,11 +684,16 @@ static InterpretResult run()
                 const ObjString* method     = READ_STRING();
                 const int        arg_count  = READ_BYTE();
                 const ObjClass*  superclass = AS_CLASS(pop_and_return());
-
+#ifdef VM_CACHE_IP
+                frame->ip = ip;
+#endif
                 if (!invoke_from_class(superclass, method, arg_count))
                     return InterpretRuntimeError;
 
                 frame = &vm.frames[vm.frame_count - 1];
+#ifdef VM_CACHE_IP
+                ip = frame->ip;
+#endif
                 break;
             }
 
