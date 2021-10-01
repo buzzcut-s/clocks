@@ -22,6 +22,17 @@ static Value clock_native(__attribute__((unused)) const int    arg_count,
     return NUMBER_VAL((double)clock() / CLOCKS_PER_SEC);
 }
 
+static Value has_field_native(const int arg_count, const Value* args)
+{
+    if (arg_count != 2 || !IS_INSTANCE(args[0]) || !IS_STRING(args[1]))
+        return NIL_VAL;
+
+    ObjInstance* instance = AS_INSTANCE(args[0]);
+
+    Value dummy;
+    return BOOL_VAL(table_find(&instance->fields, AS_STRING(args[1]), &dummy));
+}
+
 static void reset_stack()
 {
     vm.stack_top   = vm.stack;
@@ -78,6 +89,7 @@ void init_vm()
     vm.init_string = copy_string("init", 4);
 
     define_native("clock", clock_native);
+    define_native("has_field", has_field_native);
 }
 
 void free_vm()
