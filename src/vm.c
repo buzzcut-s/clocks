@@ -86,6 +86,10 @@ void init_vm()
     vm.bytes_allocated    = 0;
     vm.next_gc_thresh     = 1024 * 1024;
 
+#ifdef GC_OPTIMIZE_CLEARING_MARK
+    vm.mark_value = true;
+#endif
+
     vm.init_string = copy_string("init", 4);
 
     define_native("clock", clock_native);

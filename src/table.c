@@ -5,6 +5,7 @@
 #include <clocks/common.h>
 #include <clocks/memory.h>
 #include <clocks/object.h>
+#include <clocks/vm.h>
 
 #define TABLE_MAX_LOAD 0.75
 
@@ -191,7 +192,14 @@ void table_remove_white(Table* table)
     for (int i = 0; i < table->capacity; i++)
     {
         Entry* entry = &table->entries[i];
-        if (entry->key != NULL && !entry->key->obj.is_marked)
+        if (entry->key != NULL
+#ifdef GC_OPTIMIZE_CLEARING_MARK
+            && entry->key->obj.mark != vm.mark_value)
+#else
+            && !entry->key->obj.is_marked)
+#endif
+        {
             table_remove(table, entry->key);
+        }
     }
 }

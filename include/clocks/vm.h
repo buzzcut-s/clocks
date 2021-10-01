@@ -30,6 +30,10 @@ typedef struct
     size_t bytes_allocated;
     size_t next_gc_thresh;
 
+#ifdef GC_OPTIMIZE_CLEARING_MARK
+    bool mark_value;
+#endif
+
     ObjString* init_string;
 
     Obj*        obj_head;

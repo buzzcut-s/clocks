@@ -21,8 +21,12 @@ typedef enum
 
 struct Obj
 {
-    ObjType     type;
-    bool        is_marked;
+    ObjType type;
+#ifdef GC_OPTIMIZE_CLEARING_MARK
+    bool mark;
+#else
+    bool is_marked;
+#endif
     struct Obj* next;
 };
 

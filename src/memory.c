@@ -49,8 +49,15 @@ void* reallocate(void* pointer, const size_t old_size, const size_t new_size)
 
 void mark_object(Obj* object)
 {
-    if (object == NULL || object->is_marked)
+    if (object == NULL
+#ifdef GC_OPTIMIZE_CLEARING_MARK
+        || object->mark == vm.mark_value)
+#else
+        || object->is_marked)
+#endif
+    {
         return;
+    }
 
 #ifdef DEBUG_LOG_GC
     printf("%p mark ", (void*)object);
@@ -58,7 +65,11 @@ void mark_object(Obj* object)
     printf("\n");
 #endif
 
+#ifdef GC_OPTIMIZE_CLEARING_MARK
+    object->mark = vm.mark_value;
+#else
     object->is_marked = true;
+#endif
 
     if (object->type == ObjTypeString || object->type == ObjTypeNative)
     {
@@ -188,11 +199,16 @@ static void sweep()
     Obj* curr = vm.obj_head;
     while (curr != NULL)
     {
+#ifdef GC_OPTIMIZE_CLEARING_MARK
+        if (curr->mark == vm.mark_value)
+        {
+#else
         if (curr->is_marked)
         {
             curr->is_marked = false;
-            prev            = curr;
-            curr            = curr->next;
+#endif
+            prev = curr;
+            curr = curr->next;
         }
         else
         {
@@ -220,6 +236,10 @@ void collect_garbage()
     trace_references();
     table_remove_white(&vm.strings);
     sweep();
+
+#ifdef GC_OPTIMIZE_CLEARING_MARK
+    vm.mark_value = !vm.mark_value;
+#endif
 
     vm.next_gc_thresh = vm.bytes_allocated * GC_HEAP_GROW_FACTOR;
 

@@ -15,9 +15,14 @@
 
 static Obj* allocate_obj(const size_t size, const ObjType type)
 {
-    Obj* object       = (Obj*)reallocate(NULL, 0, size);
-    object->type      = type;
+    Obj* object  = (Obj*)reallocate(NULL, 0, size);
+    object->type = type;
+
+#ifdef GC_OPTIMIZE_CLEARING_MARK
+    object->mark = !vm.mark_value;
+#else
     object->is_marked = false;
+#endif
 
     object->next = vm.obj_head;
     vm.obj_head  = object;
