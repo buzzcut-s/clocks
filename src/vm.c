@@ -335,11 +335,35 @@ static bool bind_method(const ObjClass* klass, const ObjString* name)
 static InterpretResult run()
 {
     CallFrame* frame = &vm.frames[vm.frame_count - 1];
+#ifdef VM_CACHE_IP
+    register uint8_t* ip = frame->ip;
+#endif
 
-#define READ_BYTE()     (*frame->ip++)
+#ifdef VM_CACHE_IP
+#define READ_BYTE()  (*ip++)
+#define READ_SHORT() (ip += 2, (uint16_t)(ip[-2] << 8) | ip[-1])
+#else
+#define READ_BYTE()  (*frame->ip++)
+#define READ_SHORT() (frame->ip += 2, (uint16_t)(frame->ip[-2] << 8) | frame->ip[-1])
+#endif
 #define READ_CONSTANT() (frame->closure->func->chunk.constants.values[READ_BYTE()])
-#define READ_SHORT()    (frame->ip += 2, (uint16_t)(frame->ip[-2] << 8) | frame->ip[-1])
 #define READ_STRING()   AS_STRING(READ_CONSTANT())
+
+#ifdef VM_CACHE_IP
+#define BINARY_OP(value_type, op)                       \
+    do {                                                \
+        if (!IS_NUMBER(peek(0)) || !IS_NUMBER(peek(1))) \
+        {                                               \
+            frame->ip = ip;                             \
+            runtime_error("Operands must be numbers");  \
+            return InterpretRuntimeError;               \
+        }                                               \
+        const double b = AS_NUMBER(pop_and_return());   \
+        const double a = AS_NUMBER(pop_and_return());   \
+        push(value_type(a op b));                       \
+    }                                                   \
+    while (false)
+#else
 #define BINARY_OP(value_type, op)                       \
     do {                                                \
         if (!IS_NUMBER(peek(0)) || !IS_NUMBER(peek(1))) \
@@ -352,6 +376,7 @@ static InterpretResult run()
         push(value_type(a op b));                       \
     }                                                   \
     while (false)
+#endif
 
 #ifdef DEBUG_TRACE_EXECUTION
     printf("== execution trace ==");
@@ -415,6 +440,9 @@ static InterpretResult run()
                 Value value;
                 if (!table_find(&vm.globals, name, &value))
                 {
+#ifdef VM_CACHE_IP
+                    frame->ip = ip;
+#endif
                     runtime_error("Undefined variable '%s'.", name->chars);
                     return InterpretRuntimeError;
                 }
@@ -435,6 +463,9 @@ static InterpretResult run()
                 if (table_insert(&vm.globals, name, peek(0)))
                 {
                     table_remove(&vm.globals, name);
+#ifdef VM_CACHE_IP
+                    frame->ip = ip;
+#endif
                     runtime_error("Undefined variable '%s'.", name->chars);
                     return InterpretRuntimeError;
                 }
@@ -528,6 +559,9 @@ static InterpretResult run()
                     BINARY_OP(NUMBER_VAL, +);
                 else
                 {
+#ifdef VM_CACHE_IP
+                    frame->ip = ip;
+#endif
                     runtime_error("Operands must be two numbers or two strings.");
                     return InterpretRuntimeError;
                 }
@@ -550,6 +584,9 @@ static InterpretResult run()
             case OpNegate:
                 if (!IS_NUMBER(peek(0)))
                 {
+#ifdef VM_CACHE_IP
+                    frame->ip = ip;
+#endif
                     runtime_error("Operand must be a number");
                     return InterpretRuntimeError;
                 }
@@ -564,7 +601,11 @@ static InterpretResult run()
             case OpJump:
             {
                 uint16_t offset = READ_SHORT();
+#ifdef VM_CACHE_IP
+                ip += offset;
+#else
                 frame->ip += offset;
+#endif
                 break;
             }
 
@@ -572,22 +613,36 @@ static InterpretResult run()
             {
                 uint16_t offset = READ_SHORT();
                 if (is_falsey(peek(0)))
+#ifdef VM_CACHE_IP
+                    ip += offset;
+#else
                     frame->ip += offset;
+#endif
                 break;
             }
             case OpLoop:
             {
                 uint16_t offset = READ_SHORT();
-                frame->ip -= offset;
+#ifdef VM_CACHE_IP
+                ip += offset;
+#else
+                frame->ip += offset;
+#endif
                 break;
             }
 
             case OpCall:
             {
                 const int arg_count = READ_BYTE();
+#ifdef VM_CACHE_IP
+                frame->ip = ip;
+#endif
                 if (!call_value(peek(arg_count), arg_count))
                     return InterpretRuntimeError;
                 frame = &vm.frames[vm.frame_count - 1];
+#ifdef VM_CACHE_IP
+                ip = frame->ip;
+#endif
                 break;
             }
             case OpInvoke:
@@ -649,6 +704,9 @@ static InterpretResult run()
                 vm.stack_top = frame->slots;
                 push(result);
                 frame = &vm.frames[vm.frame_count - 1];
+#ifdef VM_CACHE_IP
+                ip = frame->ip;
+#endif
                 break;
             }
 
