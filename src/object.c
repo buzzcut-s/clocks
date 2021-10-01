@@ -137,6 +137,9 @@ ObjClass* new_class(ObjString* name)
 {
     ObjClass* klass = ALLOCATE_OBJ(ObjClass, ObjTypeClass);
     klass->name     = name;
+#ifdef CACHE_CLASS_INITIALIZER
+    klass->initializer = NIL_VAL;
+#endif
     init_table(&klass->methods);
     return klass;
 }

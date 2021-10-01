@@ -20,6 +20,7 @@
 #define NAN_BOXING
 #define OPTIMIZED_POP
 #define FNV_GCC_OPTIMIZATION
+#define CACHE_CLASS_INITIALIZER
 #endif
 
 #define UINT8_COUNT (UINT8_MAX + 1)

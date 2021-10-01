@@ -103,7 +103,10 @@ typedef struct
 {
     Obj        obj;
     ObjString* name;
-    Table      methods;
+#ifdef CACHE_CLASS_INITIALIZER
+    Value initializer;
+#endif
+    Table methods;
 } ObjClass;
 
 #define IS_CLASS(value) is_obj_type(value, ObjTypeClass)

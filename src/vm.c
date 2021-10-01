@@ -188,10 +188,14 @@ static bool call_value(const Value callee, const int arg_count)
                 ObjClass* klass              = AS_CLASS(callee);
                 vm.stack_top[-arg_count - 1] = OBJ_VAL(new_instance(klass));
 
+#ifdef CACHE_CLASS_INITIALIZER
+                if (!IS_NIL(klass->initializer))
+                    return call(AS_CLOSURE(klass->initializer), arg_count);
+#else
                 Value initializer;
                 if (table_find(&klass->methods, vm.init_string, &initializer))
                     return call(AS_CLOSURE(initializer), arg_count);
-
+#endif
                 if (arg_count != 0)
                 {
                     runtime_error("Expected 0 arguments but got %d", arg_count);
@@ -289,6 +293,10 @@ static void define_method(ObjString* name)
 {
     const Value method = peek(0);
     ObjClass*   klass  = AS_CLASS(peek(1));
+#ifdef CACHE_CLASS_INITIALIZER
+    if (name == vm.init_string)
+        klass->initializer = method;
+#endif
     table_insert(&klass->methods, name, method);
     pop();
 }
