@@ -24,7 +24,7 @@ void free_table(Table* table)
 
 static Entry* find_entry(Entry* entries, const int capacity, const ObjString* key)
 {
-#ifdef OPTIMIZED_TABLE_FIND_ENTRY
+#ifdef TABLE_OPTIMIZED_FIND_ENTRY
     uint32_t index = key->hash & (capacity - 1);
 #else
     uint32_t index = key->hash % capacity;
@@ -46,7 +46,7 @@ static Entry* find_entry(Entry* entries, const int capacity, const ObjString* ke
         }
         else if (entry->key == key)
             return entry;
-#ifdef OPTIMIZED_TABLE_FIND_ENTRY
+#ifdef TABLE_OPTIMIZED_FIND_ENTRY
         index = (index + 1) & (capacity - 1);
 #else
         index = (index + 1) % capacity;
@@ -148,7 +148,7 @@ ObjString* table_find_string(const Table* table, const char* chars,
     if (table->count == 0)
         return NULL;
 
-#ifdef OPTIMIZED_TABLE_FIND_ENTRY
+#ifdef TABLE_OPTIMIZED_FIND_ENTRY
     uint32_t index = hash & (table->capacity - 1);
 #else
     uint32_t index = hash % table->capacity;
@@ -169,7 +169,7 @@ ObjString* table_find_string(const Table* table, const char* chars,
         {
             return entry->key;
         }
-#ifdef OPTIMIZED_TABLE_FIND_ENTRY
+#ifdef TABLE_OPTIMIZED_FIND_ENTRY
         index = (index + 1) & (table->capacity - 1);
 #else
         index = (index + 1) % table->capacity;

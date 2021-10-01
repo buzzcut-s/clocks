@@ -53,14 +53,14 @@ static ObjString* allocate_string(char* chars, const int length, const uint32_t 
 uint32_t hash_string(const char* key, const int length)
 {
 #define FNV_OFFSET_BASIS 2166136261U
-#ifndef FNV_GCC_OPTIMIZATION
+#ifndef TABLE_FNV_GCC_OPTIMIZATION
 #define FNV_PRIME 16777619U
 #endif
     uint32_t hash = FNV_OFFSET_BASIS;
     for (int i = 0; i < length; i++)
     {
         hash ^= (uint8_t)key[i];
-#ifdef FNV_GCC_OPTIMIZATION  // http://www.isthe.com/chongo/tech/comp/fnv/#gcc-O3
+#ifdef TABLE_FNV_GCC_OPTIMIZATION  // http://www.isthe.com/chongo/tech/comp/fnv/#gcc-O3
         hash += (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
 #else
         hash *= FNV_PRIME;
@@ -176,7 +176,7 @@ ObjClass* new_class(ObjString* name)
 {
     ObjClass* klass = ALLOCATE_OBJ(ObjClass, ObjTypeClass);
     klass->name     = name;
-#ifdef CACHE_CLASS_INITIALIZER
+#ifdef OBJECT_CACHE_CLASS_INITIALIZER
     klass->initializer = NIL_VAL;
 #endif
     init_table(&klass->methods);

@@ -114,7 +114,7 @@ typedef struct
 {
     Obj        obj;
     ObjString* name;
-#ifdef CACHE_CLASS_INITIALIZER
+#ifdef OBJECT_CACHE_CLASS_INITIALIZER
     Value initializer;
 #endif
     Table methods;

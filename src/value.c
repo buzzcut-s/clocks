@@ -8,7 +8,7 @@
 
 bool values_equal(const Value a, const Value b)
 {
-#ifdef NAN_BOXING
+#ifdef VALUE_NAN_BOXING
     if (IS_NUMBER(a) && IS_NUMBER(b))
         return AS_NUMBER(a) == AS_NUMBER(b);
     return a == b;
@@ -63,7 +63,7 @@ void write_value_array(ValueArray* array, const Value value)
 
 void print_value(const Value value)
 {
-#ifdef NAN_BOXING
+#ifdef VALUE_NAN_BOXING
     if (IS_BOOL(value))
         printf(AS_BOOL(value) ? "true" : "false");
     else if (IS_NIL(value))

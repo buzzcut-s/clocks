@@ -58,7 +58,7 @@ void free_vm();
 
 void push(Value value);
 
-#ifdef OPTIMIZED_POP
+#ifdef VM_OPTIMIZED_POP
 Value pop_and_return();
 void  pop();
 #else

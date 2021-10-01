@@ -110,7 +110,7 @@ void push(const Value value)
     vm.stack_top++;
 }
 
-#ifdef OPTIMIZED_POP
+#ifdef VM_OPTIMIZED_POP
 Value pop_and_return()
 {
     vm.stack_top--;
@@ -212,7 +212,7 @@ static bool call_value(const Value callee, const int arg_count)
                 ObjClass* klass              = AS_CLASS(callee);
                 vm.stack_top[-arg_count - 1] = OBJ_VAL(new_instance(klass));
 
-#ifdef CACHE_CLASS_INITIALIZER
+#ifdef OBJECT_CACHE_CLASS_INITIALIZER
                 if (!IS_NIL(klass->initializer))
                     return call(AS_CLOSURE(klass->initializer), arg_count);
 #else
@@ -317,7 +317,7 @@ static void define_method(ObjString* name)
 {
     const Value method = peek(0);
     ObjClass*   klass  = AS_CLASS(peek(1));
-#ifdef CACHE_CLASS_INITIALIZER
+#ifdef OBJECT_CACHE_CLASS_INITIALIZER
     if (name == vm.init_string)
         klass->initializer = method;
 #endif

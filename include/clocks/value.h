@@ -5,7 +5,7 @@
 
 typedef struct Obj Obj;
 
-#ifdef NAN_BOXING
+#ifdef VALUE_NAN_BOXING
 
 #include <string.h>
 
