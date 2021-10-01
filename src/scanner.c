@@ -56,7 +56,7 @@ static char peek_next()
     return scanner.current[1];
 }
 
-static bool match(char expected)
+static bool match(const char expected)
 {
     if (is_at_end())
         return false;
@@ -135,61 +135,47 @@ static TokenType check_keyword(const size_t start, const size_t length,
     return TokenIdentifier;
 }
 
+// clang-format off
 static TokenType identifier_type()
 {
     switch (scanner.start[0])
     {
-        case 'a':
-            return check_keyword(1, 2, "nd", TokenAnd);
-        case 'c':
-            return check_keyword(1, 4, "lass", TokenClass);
-        case 'e':
-            return check_keyword(1, 3, "lse", TokenElse);
+        case 'a': return check_keyword(1, 2, "nd", TokenAnd);
+        case 'c': return check_keyword(1, 4, "lass", TokenClass);
+        case 'e': return check_keyword(1, 3, "lse", TokenElse);
         case 'f':
             if (token_length() > 1)
             {
                 switch (scanner.start[1])
                 {
-                    case 'a':
-                        return check_keyword(2, 3, "lse", TokenFalse);
-                    case 'o':
-                        return check_keyword(2, 1, "r", TokenFor);
-                    case 'u':
-                        return check_keyword(2, 1, "n", TokenFun);
+                    case 'a': return check_keyword(2, 3, "lse", TokenFalse);
+                    case 'o': return check_keyword(2, 1, "r", TokenFor);
+                    case 'u': return check_keyword(2, 1, "n", TokenFun);
                 }
             }
             break;
-        case 'i':
-            return check_keyword(1, 1, "f", TokenIf);
-        case 'n':
-            return check_keyword(1, 2, "il", TokenNil);
-        case 'o':
-            return check_keyword(1, 1, "r", TokenOr);
-        case 'p':
-            return check_keyword(1, 4, "rint", TokenPrint);
-        case 'r':
-            return check_keyword(1, 5, "eturn", TokenReturn);
-        case 's':
-            return check_keyword(1, 4, "uper", TokenSuper);
+        case 'i': return check_keyword(1, 1, "f", TokenIf);
+        case 'n': return check_keyword(1, 2, "il", TokenNil);
+        case 'o': return check_keyword(1, 1, "r", TokenOr);
+        case 'p': return check_keyword(1, 4, "rint", TokenPrint);
+        case 'r': return check_keyword(1, 5, "eturn", TokenReturn);
+        case 's': return check_keyword(1, 4, "uper", TokenSuper);
         case 't':
             if (token_length() > 1)
             {
                 switch (scanner.start[1])
                 {
-                    case 'h':
-                        return check_keyword(2, 2, "is", TokenThis);
-                    case 'r':
-                        return check_keyword(2, 2, "ue", TokenTrue);
+                    case 'h': return check_keyword(2, 2, "is", TokenThis);
+                    case 'r': return check_keyword(2, 2, "ue", TokenTrue);
                 }
             }
             break;
-        case 'v':
-            return check_keyword(1, 2, "ar", TokenVar);
-        case 'w':
-            return check_keyword(1, 4, "hile", TokenWhile);
+        case 'v': return check_keyword(1, 2, "ar", TokenVar);
+        case 'w': return check_keyword(1, 4, "hile", TokenWhile);
     }
     return TokenIdentifier;
 }
+// clang-format on
 
 static Token identifier()
 {
@@ -244,48 +230,29 @@ Token scan_token()
     if (is_alpha(c))
         return identifier();
 
+    // clang-format off
     switch (c)
     {
-        case '(':
-            return make_token(TokenLeftParen);
-        case ')':
-            return make_token(TokenRightParen);
-        case '{':
-            return make_token(TokenLeftBrace);
-        case '}':
-            return make_token(TokenRightBrace);
-        case ';':
-            return make_token(TokenSemicolon);
-        case ',':
-            return make_token(TokenComma);
-        case '.':
-            return make_token(TokenDot);
-        case '-':
-            return make_token(TokenMinus);
-        case '+':
-            return make_token(TokenPlus);
-        case '/':
-            return make_token(TokenSlash);
-        case '*':
-            return make_token(TokenStar);
+        case '(': return make_token(TokenLeftParen);
+        case ')': return make_token(TokenRightParen);
+        case '{': return make_token(TokenLeftBrace);
+        case '}': return make_token(TokenRightBrace);
+        case ';': return make_token(TokenSemicolon);
+        case ',': return make_token(TokenComma);
+        case '.': return make_token(TokenDot);
+        case '-': return make_token(TokenMinus);
+        case '+': return make_token(TokenPlus);
+        case '/': return make_token(TokenSlash);
+        case '*': return make_token(TokenStar);
 
-        case '!':
-            return make_token(
-              match('=') ? TokenBangEqual : TokenBang);
-        case '=':
-            return make_token(
-              match('=') ? TokenEqualEqual : TokenEqual);
-        case '<':
-            return make_token(
-              match('=') ? TokenLessEqual : TokenLess);
-        case '>':
-            return make_token(
-              match('=') ? TokenGreaterEqual : TokenGreater);
+        case '!': return make_token(match('=') ? TokenBangEqual : TokenBang);
+        case '=': return make_token(match('=') ? TokenEqualEqual : TokenEqual);
+        case '<': return make_token(match('=') ? TokenLessEqual : TokenLess);
+        case '>': return make_token( match('=') ? TokenGreaterEqual : TokenGreater);
 
-        case '"':
-            return string();
+        case '"': return string();
 
-        default:
-            return error_token("Unexpected character.");
+        default: return error_token("Unexpected character.");
     }
+    // clang-format on
 }
