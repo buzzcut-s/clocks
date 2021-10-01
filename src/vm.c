@@ -632,9 +632,9 @@ static InterpretResult run()
             {
                 uint16_t offset = READ_SHORT();
 #ifdef VM_CACHE_IP
-                ip += offset;
+                ip -= offset;
 #else
-                frame->ip += offset;
+                frame->ip -= offset;
 #endif
                 break;
             }
