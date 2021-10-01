@@ -70,11 +70,27 @@ uint32_t hash_string(const char* key, const int length)
 }
 
 #ifdef OBJECT_STRING_FLEXIBLE_ARRAY
-ObjString* make_string(const int length)
+ObjString* allocate_string(const int length)
 {
     ObjString* string = (ObjString*)allocate_obj(sizeof(ObjString) + length + 1, ObjTypeString);
     string->length    = length;
     return string;
+}
+
+static void intern_string(ObjString* string)
+{
+    push(OBJ_VAL(string));
+    table_insert(&vm.strings, string, NIL_VAL);
+    pop();
+}
+
+static void init_string(ObjString* string, const char* chars,
+                        const int length, const uint32_t hash)
+{
+    memcpy(string->chars, chars, length);
+    string->hash          = hash;
+    string->chars[length] = '\0';
+    intern_string(string);
 }
 #endif
 
@@ -90,14 +106,8 @@ ObjString* take_string(char* chars, const int length)
     }
 
 #ifdef OBJECT_STRING_FLEXIBLE_ARRAY
-    ObjString* string = make_string(length);
-    memcpy(string->chars, chars, length);
-    string->hash          = hash;
-    string->chars[length] = '\0';
-
-    push(OBJ_VAL(string));
-    table_insert(&vm.strings, string, NIL_VAL);
-    pop();
+    ObjString* string = allocate_string(length);
+    init_string(string, chars, length, hash);
 
     return string;
 #else
@@ -105,7 +115,7 @@ ObjString* take_string(char* chars, const int length)
 #endif
 }
 
-ObjString* copy_string(const char* chars, int length)
+ObjString* copy_string(const char* chars, const int length)
 {
     const uint32_t hash = hash_string(chars, length);
 
@@ -114,14 +124,8 @@ ObjString* copy_string(const char* chars, int length)
         return interned;
 
 #ifdef OBJECT_STRING_FLEXIBLE_ARRAY
-    ObjString* string = make_string(length);
-    memcpy(string->chars, chars, length);
-    string->hash          = hash;
-    string->chars[length] = '\0';
-
-    push(OBJ_VAL(string));
-    table_insert(&vm.strings, string, NIL_VAL);
-    pop();
+    ObjString* string = allocate_string(length);
+    init_string(string, chars, length, hash);
 
     return string;
 #else

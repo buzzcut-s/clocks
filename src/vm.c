@@ -152,7 +152,7 @@ static void concatenate()
     const int length = a->length + b->length;
 
 #ifdef OBJECT_STRING_FLEXIBLE_ARRAY
-    ObjString* res = make_string(length);
+    ObjString* res = allocate_string(length);
     memcpy(res->chars, a->chars, a->length);
     memcpy(res->chars + a->length, b->chars, b->length);
     res->hash          = hash_string(res->chars, length);

@@ -38,6 +38,7 @@ static inline bool is_obj_type(const Value value, const ObjType type)
 }
 
 void print_object(const Value* value);
+
 struct ObjString
 {
     Obj      obj;
@@ -54,11 +55,15 @@ struct ObjString
 #define AS_STRING(value)  ((ObjString*)AS_OBJ(value))
 #define AS_CSTRING(value) (((ObjString*)AS_OBJ(value))->chars)
 
+#ifdef OBJECT_STRING_FLEXIBLE_ARRAY
+ObjString* allocate_string(int length);
+#else
 ObjString* take_string(char* chars, int length);
+#endif
+
 ObjString* copy_string(const char* chars, int length);
 
-ObjString* make_string(int length);
-uint32_t   hash_string(const char* key, int length);
+uint32_t hash_string(const char* key, int length);
 
 typedef struct
 {
