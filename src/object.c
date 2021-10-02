@@ -60,7 +60,7 @@ uint32_t hash_string(const char* key, const int length)
     for (int i = 0; i < length; i++)
     {
         hash ^= (uint8_t)key[i];
-#ifdef TABLE_FNV_GCC_OPTIMIZATION  // http://www.isthe.com/chongo/tech/comp/fnv/#gcc-O3
+#ifdef TABLE_FNV_GCC_OPTIMIZATION
         hash += (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
 #else
         hash *= FNV_PRIME;
