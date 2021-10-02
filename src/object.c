@@ -92,7 +92,7 @@ static void init_string(ObjString* string, const char* chars,
     string->chars[length] = '\0';
     intern_string(string);
 }
-#endif
+#else
 
 ObjString* take_string(char* chars, const int length)
 {
@@ -105,15 +105,9 @@ ObjString* take_string(char* chars, const int length)
         return interned;
     }
 
-#ifdef OBJECT_STRING_FLEXIBLE_ARRAY
-    ObjString* string = allocate_string(length);
-    init_string(string, chars, length, hash);
-
-    return string;
-#else
     return allocate_string(chars, length, hash);
-#endif
 }
+#endif
 
 ObjString* copy_string(const char* chars, const int length)
 {
