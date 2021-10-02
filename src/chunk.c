@@ -23,7 +23,7 @@ void free_chunk(Chunk* chunk)
     init_chunk(chunk);
 }
 
-void write_chunk(Chunk* chunk, const uint8_t byte, const int lines)
+void write_chunk(Chunk* chunk, const uint8_t byte, const int line)
 {
     if (chunk->capacity < chunk->count + 1)
     {
@@ -37,7 +37,7 @@ void write_chunk(Chunk* chunk, const uint8_t byte, const int lines)
     }
 
     chunk->code[chunk->count]  = byte;
-    chunk->lines[chunk->count] = lines;
+    chunk->lines[chunk->count] = line;
     chunk->count++;
 }
 
