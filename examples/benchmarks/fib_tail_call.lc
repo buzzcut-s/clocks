@@ -1,5 +1,3 @@
-// Benchmark tail-call fibonacci function
-
 fun fib_impl(n, a, b)
 {
     if (n == 0) 
