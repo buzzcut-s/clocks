@@ -84,10 +84,19 @@ int disassemble_instruction(const Chunk* chunk, const int offset)
 {
     printf("%04d ", offset);
 
+#ifdef CHUNK_LINE_RUN_LENGTH_ENCODING
+    const int line = get_line(chunk, offset);
+    if (offset > 0 && line == get_line(chunk, offset - 1))
+        printf("   | ");
+    else
+        printf("%4d ", line);
+#else
+
     if (offset > 0 && chunk->lines[offset] == chunk->lines[offset - 1])
         printf("   | ");
     else
         printf("%4d ", chunk->lines[offset]);
+#endif
 
     const uint8_t instruction = chunk->code[offset];
     switch (instruction)

@@ -53,7 +53,12 @@ static void runtime_error(const char* format, ...)
         const ObjFunction* func  = frame->closure->func;
 
         const size_t instruction = frame->ip - func->chunk.code - 1;
-        fprintf(stderr, "[line %d] in ", func->chunk.lines[instruction]);
+        fprintf(stderr, "[line %d] in ",
+#ifdef CHUNK_LINE_RUN_LENGTH_ENCODING
+                get_line(&func->chunk, instruction));
+#else
+                func->chunk.lines[instruction]);
+#endif
         if (func->name == NULL)
             fprintf(stderr, "script\n");
         else
