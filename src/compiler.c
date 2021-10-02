@@ -85,25 +85,21 @@ typedef struct ClassCompiler
     bool                  has_superclass;
 } ClassCompiler;
 
-Parser         parser;
-Compiler*      current       = NULL;
-ClassCompiler* current_class = NULL;
-
 static const ParseRule* get_rule(TokenType type);
 
-static void parse_precedence(Precedence prec);
-
-static void expression();
-static void statement();
-static void declaration();
-
+static void    parse_precedence(Precedence prec);
+static void    expression();
+static void    statement();
+static void    declaration();
 static uint8_t identifier_constant(const Token* name);
 static int     resolve_local(const Compiler* compiler, const Token* name);
 static int     resolve_upvalue(Compiler* compiler, const Token* name);
-
 static uint8_t argument_list();
+static Token   synthetic_token(const char* text);
 
-static Token synthetic_token(const char* text);
+Parser         parser;
+Compiler*      current       = NULL;
+ClassCompiler* current_class = NULL;
 
 static Chunk* current_chunk()
 {
