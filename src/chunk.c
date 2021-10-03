@@ -47,9 +47,10 @@ void write_chunk(Chunk* chunk, uint8_t byte, int line)
     }
 
     chunk->code[chunk->count] = byte;
-    chunk->count++;
 
 #ifdef CHUNK_LINE_RUN_LENGTH_ENCODING
+    chunk->count++;
+
     if (chunk->line_count > 0 && chunk->lines[chunk->line_count - 1].line == line)
         return;
 
@@ -61,11 +62,12 @@ void write_chunk(Chunk* chunk, uint8_t byte, int line)
                                             old_capacity, chunk->line_capacity);
     }
 
-    LineStart* line_start = &chunk->lines[chunk->line_count++];
-    line_start->offset    = chunk->count - 1;
-    line_start->line      = line;
+    LineStart* next_line = &chunk->lines[chunk->line_count++];
+    next_line->offset    = chunk->count - 1;
+    next_line->line      = line;
 #else
     chunk->lines[chunk->count] = line;
+    chunk->count++;
 #endif
 }
 
