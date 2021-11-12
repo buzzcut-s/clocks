@@ -225,13 +225,13 @@ static void emit_return()
 
 static uint8_t make_constant(const Value value)
 {
-    const int constant = add_constant(current_chunk(), value);
-    if (constant > UINT8_MAX)
+    const int constant_index = add_constant(current_chunk(), value);
+    if (constant_index > UINT8_MAX)
     {
         error("Too many constants in one chunk.");
         return 0;
     }
-    return (uint8_t)constant;
+    return (uint8_t)constant_index;
 }
 
 static void emit_constant(const Value value)
@@ -443,7 +443,7 @@ static void literal(__attribute__((unused)) const bool can_assign)
 
 static void and_fn(__attribute__((unused)) const bool can_assign)
 {
-    int end_jump = emit_jump(OpJumpIfFalse);
+    const int end_jump = emit_jump(OpJumpIfFalse);
     emit_byte(OpPop);
     parse_precedence(PrecAnd);
     backpatch(end_jump);
@@ -800,7 +800,7 @@ static void function(const FunctionType type)
     consume(TokenLeftBrace, "Expect '{' after function name.");
     block();
 
-    ObjFunction* func = end_compiler();
+    const ObjFunction* func = end_compiler();
     emit_bytes(OpClosure, make_constant(OBJ_VAL(func)));
 
     for (int i = 0; i < func->upvalue_count; i++)
@@ -824,10 +824,10 @@ static void method()
 
     const uint8_t constant = identifier_constant(&parser.previous);
 
-    FunctionType type = (parser.previous.length == 4
-                         && memcmp(parser.previous.start, "init", 4) == 0)
-                          ? FuncTypeInitializer
-                          : FuncTypeMethod;
+    const FunctionType type = (parser.previous.length == 4
+                               && memcmp(parser.previous.start, "init", 4) == 0)
+                                ? FuncTypeInitializer
+                                : FuncTypeMethod;
 
     function(type);
 
@@ -847,7 +847,7 @@ static void class_declaration()
     consume(TokenIdentifier, "Expect class name.");
     const Token class_name = parser.previous;
 
-    const uint8_t name_constant = identifier_constant(&parser.previous);
+    const uint8_t name_constant = identifier_constant(&class_name);
     declare_variable();
 
     emit_bytes(OpClass, name_constant);

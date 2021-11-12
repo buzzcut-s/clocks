@@ -623,7 +623,7 @@ static InterpretResult run()
 
             case OpJump:
             {
-                uint16_t offset = READ_SHORT();
+                const uint16_t offset = READ_SHORT();
 #ifdef VM_CACHE_IP
                 ip += offset;
 #else
@@ -634,7 +634,7 @@ static InterpretResult run()
 
             case OpJumpIfFalse:
             {
-                uint16_t offset = READ_SHORT();
+                const uint16_t offset = READ_SHORT();
                 if (is_falsey(peek(0)))
 #ifdef VM_CACHE_IP
                     ip += offset;
@@ -645,7 +645,7 @@ static InterpretResult run()
             }
             case OpLoop:
             {
-                uint16_t offset = READ_SHORT();
+                const uint16_t offset = READ_SHORT();
 #ifdef VM_CACHE_IP
                 ip -= offset;
 #else

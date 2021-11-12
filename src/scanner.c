@@ -248,7 +248,7 @@ Token scan_token()
         case '!': return make_token(match('=') ? TokenBangEqual : TokenBang);
         case '=': return make_token(match('=') ? TokenEqualEqual : TokenEqual);
         case '<': return make_token(match('=') ? TokenLessEqual : TokenLess);
-        case '>': return make_token( match('=') ? TokenGreaterEqual : TokenGreater);
+        case '>': return make_token(match('=') ? TokenGreaterEqual : TokenGreater);
 
         case '"': return string();
 
