@@ -948,7 +948,6 @@ static void for_statement()
     begin_scope();
     consume(TokenLeftParen, "Expect '(' after 'for'.");
 
-    // Initializer clause
     if (match(TokenSemicolon))
     {}
     else if (match(TokenVar))
@@ -956,10 +955,8 @@ static void for_statement()
     else
         expression_statement();
 
-    // Just before the condition
     int loop_start = current_chunk()->count;
 
-    // Condition clause
     int exit_jump = -1;
     if (!match(TokenSemicolon))
     {
@@ -969,23 +966,17 @@ static void for_statement()
         emit_byte(OpPop);
     }
 
-    // Increment clause
     if (!match(TokenRightParen))
     {
-        const int body_jump  = emit_jump(OpJump);  // Jump unconditionally over increment
+        const int body_jump  = emit_jump(OpJump);
         const int incr_start = current_chunk()->count;
 
-        expression();  // Compile increment expression (only for its side effect)
+        expression();
         emit_byte(OpPop);
         consume(TokenRightParen, "Expect ')' after for clauses.");
 
-        // Jump to right before the condition expr, if there is any.
         emit_loop(loop_start);
 
-        // Change loop_start to point to the offset where the increment expression begins
-        // Later, when we emit the loop instruction after the body statement,
-        // this will cause it to jump up to the increment expression
-        // instead of the top of the loop like it does when there is no increment.
         loop_start = incr_start;
         backpatch(body_jump);
     }
@@ -996,7 +987,7 @@ static void for_statement()
     if (exit_jump != -1)
     {
         backpatch(exit_jump);
-        emit_byte(OpPop);  // Condition
+        emit_byte(OpPop);
     }
 
     end_scope();
