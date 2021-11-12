@@ -1052,10 +1052,8 @@ static void synchronize()
             case TokenReturn:
                 return;
             default:
-            {
-            }
+                advance();
         }
-        advance();
     }
 }
 
