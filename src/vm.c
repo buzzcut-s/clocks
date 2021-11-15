@@ -175,7 +175,7 @@ static void concatenate()
     push(OBJ_VAL(res));
 }
 
-static bool call(ObjClosure* closure, const int arg_count)
+static bool call(const ObjClosure* closure, const int arg_count)
 {
     if (arg_count != closure->func->arity)
     {
@@ -704,8 +704,8 @@ static InterpretResult run()
 
             case OpClosure:
             {
-                ObjFunction* func    = AS_FUNCTION(READ_CONSTANT());
-                ObjClosure*  closure = new_closure(func);
+                ObjFunction*      func    = AS_FUNCTION(READ_CONSTANT());
+                const ObjClosure* closure = new_closure(func);
                 push(OBJ_VAL(closure));
                 for (int i = 0; i < closure->upvalue_count; i++)
                 {

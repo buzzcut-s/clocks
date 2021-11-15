@@ -11,9 +11,9 @@
 
 typedef struct
 {
-    ObjClosure* closure;
-    uint8_t*    ip;
-    Value*      slots;
+    const ObjClosure* closure;
+    uint8_t*          ip;
+    Value*            slots;
 } CallFrame;
 
 typedef struct
