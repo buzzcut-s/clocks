@@ -373,7 +373,7 @@ static InterpretResult run()
         if (!IS_NUMBER(peek(0)) || !IS_NUMBER(peek(1))) \
         {                                               \
             frame->ip = ip;                             \
-            runtime_error("Operands must be numbers");  \
+            runtime_error("Operands must be numbers."); \
             return InterpretRuntimeError;               \
         }                                               \
         const double b = AS_NUMBER(pop_and_return());   \
@@ -386,7 +386,7 @@ static InterpretResult run()
     do {                                                \
         if (!IS_NUMBER(peek(0)) || !IS_NUMBER(peek(1))) \
         {                                               \
-            runtime_error("Operands must be numbers");  \
+            runtime_error("Operands must be numbers."); \
             return InterpretRuntimeError;               \
         }                                               \
         const double b = AS_NUMBER(pop_and_return());   \
@@ -583,8 +583,12 @@ static InterpretResult run()
             {
                 if (IS_STRING(peek(0)) && IS_STRING(peek(1)))
                     concatenate();
-                else if (IS_NUMBER(peek(0)))
-                    BINARY_OP(NUMBER_VAL, +);
+                else if (IS_NUMBER(peek(0)) && IS_NUMBER(peek(1)))
+                {
+                    const double b = AS_NUMBER(pop_and_return());
+                    const double a = AS_NUMBER(pop_and_return());
+                    push(NUMBER_VAL(a + b));
+                }
                 else
                 {
 #ifdef VM_CACHE_IP
