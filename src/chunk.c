@@ -70,7 +70,7 @@ void write_chunk(Chunk* chunk, const uint8_t byte, const int line)
 }
 
 #ifdef CHUNK_LINE_RUN_LENGTH_ENCODING
-int get_line(const Chunk* chunk, const int instr_offset)
+int get_line(const Chunk* chunk, const int offset)
 {
     int start = 0;
     int end   = chunk->line_count - 1;
@@ -81,9 +81,9 @@ int get_line(const Chunk* chunk, const int instr_offset)
 
         const LineStart* current = &chunk->lines[mid];
 
-        if (instr_offset < current->offset)
+        if (offset < current->offset)
             end = mid + 1;
-        else if (mid == chunk->line_count - 1 || instr_offset < chunk->lines[mid + 1].offset)
+        else if (mid == chunk->line_count - 1 || offset < chunk->lines[mid + 1].offset)
             return current->line;
         else
             start = mid + 1;

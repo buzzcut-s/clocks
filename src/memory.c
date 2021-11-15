@@ -103,9 +103,12 @@ static void mark_roots()
     for (int i = 0; i < vm.frame_count; i++)
         mark_object((Obj*)vm.frames[i].closure);
 
-    for (ObjUpvalue* upvalue = vm.open_upvalues_head; upvalue != NULL;
-         upvalue             = upvalue->next)
+    for (ObjUpvalue* upvalue = vm.open_upvalues_head;
+         upvalue != NULL;
+         upvalue = upvalue->next)
+    {
         mark_object((Obj*)upvalue);
+    }
 
     mark_table(&vm.globals);
     mark_compiler_roots();
@@ -272,6 +275,7 @@ static void free_object(Obj* object)
 #endif
             break;
         }
+
         case ObjTypeFunction:
         {
             ObjFunction* func = (ObjFunction*)object;
@@ -279,9 +283,11 @@ static void free_object(Obj* object)
             FREE(ObjFunction, object);
             break;
         }
+
         case ObjTypeNative:
             FREE(ObjNative, object);
             break;
+
         case ObjTypeClosure:
         {
             ObjClosure* closure = (ObjClosure*)object;
@@ -289,9 +295,11 @@ static void free_object(Obj* object)
             FREE(ObjClosure, object);
             break;
         }
+
         case ObjTypeUpvalue:
             FREE(ObjUpvalue, object);
             break;
+
         case ObjTypeClass:
         {
             ObjClass* klass = (ObjClass*)object;
@@ -299,6 +307,7 @@ static void free_object(Obj* object)
             FREE(ObjClass, object);
             break;
         }
+
         case ObjTypeInstance:
         {
             ObjInstance* instance = (ObjInstance*)object;
@@ -306,6 +315,7 @@ static void free_object(Obj* object)
             FREE(ObjInstance, instance);
             break;
         }
+
         case ObjTypeBoundMethod:
             FREE(ObjBoundMethod, object);
             break;

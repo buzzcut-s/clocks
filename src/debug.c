@@ -12,9 +12,7 @@ void disassemble_chunk(const Chunk* chunk, const char* name)
     printf("== %s ==\n", name);
 
     for (int offset = 0; offset < chunk->count;)
-    {
         offset = disassemble_instruction(chunk, offset);
-    }
 }
 
 static int constant_instruction(const char* name, const Chunk* chunk, const int offset)
@@ -91,7 +89,6 @@ int disassemble_instruction(const Chunk* chunk, const int offset)
     else
         printf("%4d ", line);
 #else
-
     if (offset > 0 && chunk->lines[offset] == chunk->lines[offset - 1])
         printf("   | ");
     else

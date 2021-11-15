@@ -52,9 +52,9 @@ static ObjString* allocate_string(char* chars, const int length, const uint32_t 
 
 uint32_t hash_string(const char* key, const int length)
 {
-#define FNV_OFFSET_BASIS 2166136261U
+    static const unsigned int FNV_OFFSET_BASIS = 2166136261U;
 #ifndef TABLE_FNV_GCC_OPTIMIZATION
-#define FNV_PRIME 16777619U
+    static const unsigned int FNV_PRIME = 16777619U;
 #endif
     uint32_t hash = FNV_OFFSET_BASIS;
     for (int i = 0; i < length; i++)
@@ -93,7 +93,6 @@ static void init_string(ObjString* string, const char* chars,
     intern_string(string);
 }
 #else
-
 ObjString* take_string(char* chars, const int length)
 {
     const uint32_t hash = hash_string(chars, length);
@@ -164,7 +163,7 @@ ObjClosure* new_closure(ObjFunction* func)
 ObjUpvalue* new_upvalue(Value* slot)
 {
     ObjUpvalue* upvalue = ALLOCATE_OBJ(ObjUpvalue, ObjTypeUpvalue);
-    upvalue->loc        = slot;
+    upvalue->location   = slot;
     upvalue->closed     = NIL_VAL;
     upvalue->next       = NULL;
     return upvalue;
@@ -200,11 +199,9 @@ ObjBoundMethod* new_bound_method(Value recv, ObjClosure* method)
 static void print_function(const ObjFunction* func)
 {
     if (func->name == NULL)
-    {
         printf("<script>");
-        return;
-    }
-    printf("<fn %s>", func->name->chars);
+    else
+        printf("<fn %s>", func->name->chars);
 }
 
 void print_object(const Value* value)

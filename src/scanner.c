@@ -75,21 +75,23 @@ static int token_length()
 
 static Token make_token(const TokenType type)
 {
-    Token token;
-    token.type   = type;
-    token.start  = scanner.start;
-    token.length = token_length();
-    token.line   = scanner.line;
+    Token token = {
+      .type   = type,
+      .start  = scanner.start,
+      .length = token_length(),
+      .line   = scanner.line,
+    };
     return token;
 }
 
 static Token error_token(const char* message)
 {
-    Token token;
-    token.type   = TokenError;
-    token.start  = message;
-    token.length = (int)strlen(message);
-    token.line   = scanner.line;
+    Token token = {
+      .type   = TokenError,
+      .start  = message,
+      .length = (int)strlen(message),
+      .line   = scanner.line,
+    };
     return token;
 }
 

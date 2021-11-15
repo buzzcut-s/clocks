@@ -46,6 +46,7 @@ static Entry* find_entry(Entry* entries, const int capacity, const ObjString* ke
         }
         else if (entry->key == key)
             return entry;
+
 #ifdef TABLE_OPTIMIZED_FIND_ENTRY
         index = (index + 1) & (capacity - 1);
 #else
@@ -169,6 +170,7 @@ ObjString* table_find_string(const Table* table, const char* chars,
         {
             return entry->key;
         }
+
 #ifdef TABLE_OPTIMIZED_FIND_ENTRY
         index = (index + 1) & (table->capacity - 1);
 #else
@@ -191,7 +193,7 @@ void table_remove_white(Table* table)
 {
     for (int i = 0; i < table->capacity; i++)
     {
-        Entry* entry = &table->entries[i];
+        const Entry* entry = &table->entries[i];
         if (entry->key != NULL
 #ifdef GC_OPTIMIZE_CLEARING_MARK
             && entry->key->obj.mark != vm.mark_value)

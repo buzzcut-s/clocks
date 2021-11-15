@@ -247,6 +247,7 @@ static bool call_value(const Value callee, const int arg_count)
                 break;
         }
     }
+
     runtime_error("Can call only functions and classes");
     return false;
 }
@@ -290,13 +291,13 @@ static ObjUpvalue* capture_upvalue(Value* local)
     ObjUpvalue* prev_upvalue = NULL;
     ObjUpvalue* upvalue      = vm.open_upvalues_head;
 
-    while (upvalue != NULL && upvalue->loc > local)
+    while (upvalue != NULL && upvalue->location > local)
     {
         prev_upvalue = upvalue;
         upvalue      = upvalue->next;
     }
 
-    if (upvalue != NULL && upvalue->loc == local)
+    if (upvalue != NULL && upvalue->location == local)
         return upvalue;
 
     ObjUpvalue* captured_upvalue = new_upvalue(local);
@@ -313,11 +314,11 @@ static ObjUpvalue* capture_upvalue(Value* local)
 static void close_upvalues(const Value* last)
 {
     while (vm.open_upvalues_head != NULL
-           && vm.open_upvalues_head->loc >= last)
+           && vm.open_upvalues_head->location >= last)
     {
         ObjUpvalue* hoisted_upvalue = vm.open_upvalues_head;
-        hoisted_upvalue->closed     = *hoisted_upvalue->loc;
-        hoisted_upvalue->loc        = &hoisted_upvalue->closed;
+        hoisted_upvalue->closed     = *hoisted_upvalue->location;
+        hoisted_upvalue->location   = &hoisted_upvalue->closed;
         vm.open_upvalues_head       = hoisted_upvalue->next;
     }
 }
@@ -491,13 +492,13 @@ static InterpretResult run()
             case OpReadUpvalue:
             {
                 const uint8_t slot = READ_BYTE();
-                push(*frame->closure->upvalues[slot]->loc);
+                push(*frame->closure->upvalues[slot]->location);
                 break;
             }
             case OpAssignUpvalue:
             {
-                const uint8_t slot                   = READ_BYTE();
-                *frame->closure->upvalues[slot]->loc = peek(0);
+                const uint8_t slot                        = READ_BYTE();
+                *frame->closure->upvalues[slot]->location = peek(0);
                 break;
             }
 

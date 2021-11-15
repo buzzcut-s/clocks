@@ -181,9 +181,9 @@ static void emit_bytes(const uint8_t byte1, const uint8_t byte2)
 
 #define BACKPATCH_PLACEHOLDER 0xFF
 
-static int emit_jump(const uint8_t instruction)
+static int emit_jump(const uint8_t jump_instruction)
 {
-    emit_byte(instruction);
+    emit_byte(jump_instruction);
     emit_byte(BACKPATCH_PLACEHOLDER);
     emit_byte(BACKPATCH_PLACEHOLDER);
     return current_chunk()->count - 2;
@@ -274,15 +274,15 @@ static void init_compiler(Compiler* compiler, const FunctionType type)
 static ObjFunction* end_compiler()
 {
     emit_return();
-    ObjFunction* func = current->func;
+    ObjFunction* compiled_function = current->func;
 #ifdef DEBUG_PRINT_CODE
     if (!parser.had_error)
-        disassemble_chunk(current_chunk(), func->name != NULL
-                                             ? func->name->chars
+        disassemble_chunk(current_chunk(), compiled_function->name != NULL
+                                             ? compiled_function->name->chars
                                              : "<script>");
 #endif
     current = current->enclosing;
-    return func;
+    return compiled_function;
 }
 
 static void begin_scope()
@@ -327,31 +327,31 @@ static void named_variable(const Token name, const bool can_assign)
     uint8_t read_op   = 0;
     uint8_t assign_op = 0;
 
-    int arg = resolve_local(current, &name);
-    if (arg != -1)
+    int variable_index = resolve_local(current, &name);
+    if (variable_index != -1)
     {
         read_op   = OpReadLocal;
         assign_op = OpAssignLocal;
     }
-    else if ((arg = resolve_upvalue(current, &name)) != -1)
+    else if ((variable_index = resolve_upvalue(current, &name)) != -1)
     {
         read_op   = OpReadUpvalue;
         assign_op = OpAssignUpvalue;
     }
     else
     {
-        arg       = identifier_constant(&name);
-        read_op   = OpReadGlobal;
-        assign_op = OpAssignGlobal;
+        variable_index = identifier_constant(&name);
+        read_op        = OpReadGlobal;
+        assign_op      = OpAssignGlobal;
     }
 
     if (can_assign && match(TokenEqual))
     {
         expression();
-        emit_bytes(assign_op, arg);
+        emit_bytes(assign_op, variable_index);
     }
     else
-        emit_bytes(read_op, arg);
+        emit_bytes(read_op, variable_index);
 }
 
 static void variable(const bool can_assign)
@@ -418,6 +418,7 @@ static void binary(__attribute__((unused)) const bool can_assign)
         case TokenSlash:
             emit_byte(OpDivide);
             break;
+
         default:
             return;
     }
@@ -471,21 +472,21 @@ static void dot(const bool can_assign)
 {
     consume(TokenIdentifier, "Expect property name after '.'.");
 
-    const uint8_t name = identifier_constant(&parser.previous);
+    const uint8_t property = identifier_constant(&parser.previous);
 
     if (can_assign && match(TokenEqual))
     {
         expression();
-        emit_bytes(OpSetField, name);
+        emit_bytes(OpSetField, property);
     }
     else if (match(TokenLeftParen))
     {
         const uint8_t arg_count = argument_list();
-        emit_bytes(OpInvoke, name);
+        emit_bytes(OpInvoke, property);
         emit_byte(arg_count);
     }
     else
-        emit_bytes(OpGetProperty, name);
+        emit_bytes(OpGetProperty, property);
 }
 
 static void this_fn(__attribute__((unused)) const bool can_assign)
@@ -508,7 +509,7 @@ static void super_fn(__attribute__((unused)) const bool can_assign)
 
     consume(TokenDot, "Expect '.' after 'super'");
     consume(TokenIdentifier, "Expect superclass method name.");
-    const uint8_t name = identifier_constant(&parser.previous);
+    const uint8_t superclass_method = identifier_constant(&parser.previous);
 
     named_variable(synthetic_token("this"), false);
 
@@ -516,13 +517,13 @@ static void super_fn(__attribute__((unused)) const bool can_assign)
     {
         const uint8_t arg_count = argument_list();
         named_variable(synthetic_token("super"), false);
-        emit_bytes(OpSuperInvoke, name);
+        emit_bytes(OpSuperInvoke, superclass_method);
         emit_byte(arg_count);
     }
     else
     {
         named_variable(synthetic_token("super"), false);
-        emit_bytes(OpGetSuper, name);
+        emit_bytes(OpGetSuper, superclass_method);
     }
 }
 
@@ -693,17 +694,17 @@ static void declare_variable()
     if (current->scope_depth == 0)
         return;
 
-    const Token* name = &parser.previous;
+    const Token* variable_name = &parser.previous;
     for (int i = current->local_count - 1; i >= 0; i--)
     {
         const Local* local = &current->locals[i];
         if (local->depth != -1 && local->depth < current->scope_depth)
             break;
-        if (identifiers_equal(name, &local->name))
+        if (identifiers_equal(variable_name, &local->name))
             error("Already a variable with this name in this scope");
     }
 
-    add_local(*name);
+    add_local(*variable_name);
 }
 
 static uint8_t parse_variable(const char* message)
@@ -766,7 +767,7 @@ static void block()
 
 static void var_declaration()
 {
-    const uint8_t global = parse_variable("Expect variable name.");
+    const uint8_t variable_name = parse_variable("Expect variable name.");
 
     if (match(TokenEqual))
         expression();
@@ -774,7 +775,7 @@ static void var_declaration()
         emit_byte(OpNil);
     consume(TokenSemicolon, "Expect ';' after variable declaration.");
 
-    define_variable(global);
+    define_variable(variable_name);
 }
 
 static void function(const FunctionType type)
@@ -791,8 +792,8 @@ static void function(const FunctionType type)
             if (current->func->arity > 255)
                 error_at_current("Can't have more than 255 parameters");
 
-            const uint8_t param = parse_variable("Expect parameter name");
-            define_variable(param);
+            const uint8_t parameter_name = parse_variable("Expect parameter name");
+            define_variable(parameter_name);
         }
         while (match(TokenComma));
     }
@@ -800,10 +801,10 @@ static void function(const FunctionType type)
     consume(TokenLeftBrace, "Expect '{' after function name.");
     block();
 
-    const ObjFunction* func = end_compiler();
-    emit_bytes(OpClosure, make_constant(OBJ_VAL(func)));
+    const ObjFunction* compiled_function = end_compiler();
+    emit_bytes(OpClosure, make_constant(OBJ_VAL(compiled_function)));
 
-    for (int i = 0; i < func->upvalue_count; i++)
+    for (int i = 0; i < compiled_function->upvalue_count; i++)
     {
         emit_byte(compiler.upvalues[i].is_local ? 1 : 0);
         emit_byte(compiler.upvalues[i].index);
@@ -812,17 +813,17 @@ static void function(const FunctionType type)
 
 static void fun_declaration()
 {
-    const uint8_t global = parse_variable("Expect function name");
+    const uint8_t function_name = parse_variable("Expect function name");
     mark_initialized();
     function(FuncTypeFunction);
-    define_variable(global);
+    define_variable(function_name);
 }
 
 static void method()
 {
     consume(TokenIdentifier, "Expect method name.");
 
-    const uint8_t constant = identifier_constant(&parser.previous);
+    const uint8_t method = identifier_constant(&parser.previous);
 
     const FunctionType type = (parser.previous.length == 4
                                && memcmp(parser.previous.start, "init", 4) == 0)
@@ -831,7 +832,7 @@ static void method()
 
     function(type);
 
-    emit_bytes(OpMethod, constant);
+    emit_bytes(OpMethod, method);
 }
 
 static Token synthetic_token(const char* text)
@@ -847,11 +848,11 @@ static void class_declaration()
     consume(TokenIdentifier, "Expect class name.");
     const Token class_name = parser.previous;
 
-    const uint8_t name_constant = identifier_constant(&class_name);
+    const uint8_t class = identifier_constant(&class_name);
     declare_variable();
 
-    emit_bytes(OpClass, name_constant);
-    define_variable(name_constant);
+    emit_bytes(OpClass, class);
+    define_variable(class);
 
     ClassCompiler class_compiler;
     class_compiler.has_superclass = false;
@@ -968,8 +969,8 @@ static void for_statement()
 
     if (!match(TokenRightParen))
     {
-        const int body_jump  = emit_jump(OpJump);
-        const int incr_start = current_chunk()->count;
+        const int body_jump       = emit_jump(OpJump);
+        const int increment_start = current_chunk()->count;
 
         expression();
         emit_byte(OpPop);
@@ -977,7 +978,7 @@ static void for_statement()
 
         emit_loop(loop_start);
 
-        loop_start = incr_start;
+        loop_start = increment_start;
         backpatch(body_jump);
     }
 
@@ -1085,8 +1086,8 @@ ObjFunction* compile(const char* source)
     while (!match(TokenEOF))
         declaration();
 
-    ObjFunction* func = end_compiler();
-    return parser.had_error ? NULL : func;
+    ObjFunction* compiled_function = end_compiler();
+    return parser.had_error ? NULL : compiled_function;
 }
 
 void mark_compiler_roots()

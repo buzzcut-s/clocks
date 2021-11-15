@@ -108,7 +108,7 @@ ObjClosure* new_closure(ObjFunction* func);
 struct ObjUpvalue
 {
     Obj         obj;
-    Value*      loc;
+    Value*      location;
     Value       closed;
     ObjUpvalue* next;
 };
