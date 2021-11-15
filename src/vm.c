@@ -757,6 +757,9 @@ static InterpretResult run()
                 const Value superclass = peek(1);
                 if (!IS_CLASS(superclass))
                 {
+#ifdef VM_CACHE_IP
+                    frame->ip = ip;
+#endif
                     runtime_error("Superclass must be a class.");
                     return InterpretRuntimeError;
                 }
