@@ -204,14 +204,16 @@ static bool call_value(const Value callee, const int arg_count)
         {
             case ObjTypeClosure:
                 return call(AS_CLOSURE(callee), arg_count);
+
             case ObjTypeNative:
             {
-                NativeFn native = AS_NATIVE(callee);
-                Value    result = native(arg_count, vm.stack_top - arg_count);
+                const NativeFn native = AS_NATIVE(callee);
+                const Value    result = native(arg_count, vm.stack_top - arg_count);
                 vm.stack_top -= arg_count + 1;
                 push(result);
                 return true;
             }
+
             case ObjTypeClass:
             {
                 ObjClass* klass              = AS_CLASS(callee);
@@ -233,12 +235,14 @@ static bool call_value(const Value callee, const int arg_count)
 
                 return true;
             }
+
             case ObjTypeBoundMethod:
             {
-                ObjBoundMethod* bound        = AS_BOUND_METHOD(callee);
+                const ObjBoundMethod* bound  = AS_BOUND_METHOD(callee);
                 vm.stack_top[-arg_count - 1] = bound->recv;
                 return call(bound->method, arg_count);
             }
+
             default:
                 break;
         }
@@ -339,7 +343,7 @@ static bool bind_method(const ObjClass* klass, const ObjString* name)
         return false;
     }
 
-    ObjBoundMethod* bound = new_bound_method(peek(0), AS_CLOSURE(method));
+    const ObjBoundMethod* bound = new_bound_method(peek(0), AS_CLOSURE(method));
     pop();
     push(OBJ_VAL(bound));
     return true;
@@ -511,7 +515,7 @@ static InterpretResult run()
                 ObjInstance* instance = AS_INSTANCE(peek(1));
                 table_insert(&instance->fields, READ_STRING(), peek(0));
 
-                Value value = pop_and_return();
+                const Value value = pop_and_return();
                 pop();
                 push(value);
                 break;
