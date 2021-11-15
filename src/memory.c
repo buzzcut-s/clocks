@@ -255,7 +255,7 @@ static void free_object(Obj* object)
 {
 #ifdef DEBUG_LOG_GC
     static const char* types[] = {"ObjString", "ObjFunction", "ObjNative", "ObjClosure",
-                                  "ObjUpvalue", "ObjClass", "ObjTypeInstance", "ObjTypeBoundMethod"};
+                                  "ObjUpvalue", "ObjClass", "ObjInstance", "ObjBoundMethod"};
     printf("%p free type %s\n", (void*)object, types[object->type]);
 #endif
 
