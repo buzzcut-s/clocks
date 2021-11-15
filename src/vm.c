@@ -52,12 +52,12 @@ static void runtime_error(const char* format, ...)
         const CallFrame*   frame = &vm.frames[i];
         const ObjFunction* func  = frame->closure->func;
 
-        const size_t instruction = frame->ip - func->chunk.code - 1;
+        const size_t instruction_offset = frame->ip - func->chunk.code - 1;
         fprintf(stderr, "[line %d] in ",
 #ifdef CHUNK_LINE_RUN_LENGTH_ENCODING
-                get_line(&func->chunk, instruction));
+                get_line(&func->chunk, instruction_offset));
 #else
-                func->chunk.lines[instruction]);
+                func->chunk.lines[instruction_offset]);
 #endif
         if (func->name == NULL)
             fprintf(stderr, "script\n");
@@ -264,7 +264,7 @@ static bool invoke_from_class(const ObjClass*  klass,
     return call(AS_CLOSURE(method), arg_count);
 }
 
-static bool invoke(const ObjString* name, const int arg_count)
+static bool invoke(const ObjString* method_name, const int arg_count)
 {
     const Value recv = peek(arg_count);
     if (!IS_INSTANCE(recv))
@@ -276,13 +276,13 @@ static bool invoke(const ObjString* name, const int arg_count)
     const ObjInstance* instance = AS_INSTANCE(recv);
 
     Value value;
-    if (table_find(&instance->fields, name, &value))
+    if (table_find(&instance->fields, method_name, &value))
     {
         vm.stack_top[-arg_count - 1] = value;
         return call_value(value, arg_count);
     }
 
-    return invoke_from_class(instance->klass, name, arg_count);
+    return invoke_from_class(instance->klass, method_name, arg_count);
 }
 
 static ObjUpvalue* capture_upvalue(Value* local)
@@ -782,16 +782,16 @@ static InterpretResult run()
 
 InterpretResult interpret(const char* source)
 {
-    ObjFunction* compiled_top = compile(source);
-    if (compiled_top == NULL)
+    ObjFunction* compiled_source = compile(source);
+    if (compiled_source == NULL)
         return InterpretCompileError;
 
-    push(OBJ_VAL(compiled_top));
-    ObjClosure* top_closure = new_closure(compiled_top);
+    push(OBJ_VAL(compiled_source));
+    ObjClosure* top_level_closure = new_closure(compiled_source);
     pop();
-    push(OBJ_VAL(top_closure));
+    push(OBJ_VAL(top_level_closure));
 
-    call(top_closure, 0);
+    call(top_level_closure, 0);
 
     return run();
 }
