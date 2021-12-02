@@ -15,7 +15,7 @@ void disassemble_chunk(const Chunk* chunk, const char* name)
         offset = disassemble_instruction(chunk, offset);
 }
 
-static int constant_instruction(const char* name, const Chunk* chunk, const int offset)
+static int constant_instruction(const char* name, const Chunk* chunk, int offset)
 {
     const uint8_t constant = chunk->code[offset + 1];
 
@@ -26,7 +26,7 @@ static int constant_instruction(const char* name, const Chunk* chunk, const int 
     return offset + 2;
 }
 
-static int simple_instruction(const char* name, const int offset)
+static int simple_instruction(const char* name, int offset)
 {
     printf("%s\n", name);
     return offset + 1;
@@ -39,8 +39,8 @@ static int byte_instruction(const char* name, const Chunk* chunk, int offset)
     return offset + 2;
 }
 
-static int jump_instruction(const char* name, const int sign,
-                            const Chunk* chunk, const int offset)
+static int jump_instruction(const char* name, int sign,
+                            const Chunk* chunk, int offset)
 {
     uint16_t jump = (uint16_t)(chunk->code[offset + 1] << 8);
     jump |= chunk->code[offset + 2];
@@ -78,7 +78,7 @@ static int invoke_instruction(const char* name, const Chunk* chunk, int offset)
     return offset + 3;
 }
 
-int disassemble_instruction(const Chunk* chunk, const int offset)
+int disassemble_instruction(const Chunk* chunk, int offset)
 {
     printf("%04d ", offset);
 

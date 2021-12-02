@@ -32,7 +32,7 @@ struct Obj
 
 #define OBJ_TYPE(value) (AS_OBJ(value)->type)
 
-static inline bool is_obj_type(const Value value, const ObjType type)
+static inline bool is_obj_type(Value value, ObjType type)
 {
     return IS_OBJ(value) && AS_OBJ(value)->type == type;
 }
@@ -79,7 +79,7 @@ typedef struct
 
 ObjFunction* new_function();
 
-typedef Value (*NativeFn)(const int arg_count, const Value* args);
+typedef Value (*NativeFn)(int arg_count, const Value* args);
 
 typedef struct
 {

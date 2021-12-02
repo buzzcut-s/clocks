@@ -21,7 +21,7 @@
 static void blacken_object(Obj* gray_obj);
 static void free_object(Obj* object);
 
-void* reallocate(void* pointer, const size_t old_size, const size_t new_size)
+void* reallocate(void* pointer, size_t old_size, size_t new_size)
 {
     vm.bytes_allocated += (new_size - old_size);
 

@@ -6,7 +6,7 @@
 #include <clocks/memory.h>
 #include <clocks/object.h>
 
-bool values_equal(const Value a, const Value b)
+bool values_equal(Value a, Value b)
 {
 #ifdef VALUE_NAN_BOXING
     if (IS_NUMBER(a) && IS_NUMBER(b))
@@ -46,7 +46,7 @@ void free_value_array(ValueArray* array)
     init_value_array(array);
 }
 
-void write_value_array(ValueArray* array, const Value value)
+void write_value_array(ValueArray* array, Value value)
 {
     if (array->capacity < array->count + 1)
     {
@@ -61,7 +61,7 @@ void write_value_array(ValueArray* array, const Value value)
     array->count++;
 }
 
-void print_value(const Value value)
+void print_value(Value value)
 {
 #ifdef VALUE_NAN_BOXING
     if (IS_BOOL(value))

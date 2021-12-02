@@ -21,14 +21,14 @@ void init_scanner(const char* source)
     scanner.line    = 1;
 }
 
-static bool is_alpha(const char c)
+static bool is_alpha(char c)
 {
     return (c >= 'a' && c <= 'z')
            || (c >= 'A' && c <= 'Z')
            || (c == '_');
 }
 
-static bool is_digit(const char c)
+static bool is_digit(char c)
 {
     return c >= '0' && c <= '9';
 }
@@ -56,7 +56,7 @@ static char peek_next()
     return scanner.current[1];
 }
 
-static bool match(const char expected)
+static bool match(char expected)
 {
     if (is_at_end())
         return false;
@@ -73,7 +73,7 @@ static int token_length()
     return (int)(scanner.current - scanner.start);
 }
 
-static Token make_token(const TokenType type)
+static Token make_token(TokenType type)
 {
     Token token = {
       .type   = type,
@@ -126,8 +126,8 @@ static void skip_whitespace()
     }
 }
 
-static TokenType check_keyword(const size_t start, const size_t length,
-                               const char* rest, const TokenType type)
+static TokenType check_keyword(size_t start, size_t length,
+                               const char* rest, TokenType type)
 {
     if (token_length() == start + length
         && memcmp(scanner.start + start, rest, length) == 0)

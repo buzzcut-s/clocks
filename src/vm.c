@@ -16,13 +16,13 @@
 
 VM vm;
 
-static Value clock_native(__attribute__((unused)) const int    arg_count,
+static Value clock_native(__attribute__((unused)) int          arg_count,
                           __attribute__((unused)) const Value* args)
 {
     return NUMBER_VAL((double)clock() / CLOCKS_PER_SEC);
 }
 
-static Value has_field_native(const int arg_count, const Value* args)
+static Value has_field_native(int arg_count, const Value* args)
 {
     if (arg_count != 2 || !IS_INSTANCE(args[0]) || !IS_STRING(args[1]))
         return NIL_VAL;
@@ -109,7 +109,7 @@ void free_vm()
     free_objects();
 }
 
-void push(const Value value)
+void push(Value value)
 {
     *vm.stack_top = value;
     vm.stack_top++;
@@ -139,12 +139,12 @@ Value pop()
 }
 #endif
 
-static Value peek(const int distance)
+static Value peek(int distance)
 {
     return vm.stack_top[-1 - distance];
 }
 
-static bool is_falsey(const Value value)
+static bool is_falsey(Value value)
 {
     return IS_NIL(value) || (IS_BOOL(value) && !AS_BOOL(value));
 }
@@ -175,7 +175,7 @@ static void concatenate()
     push(OBJ_VAL(res));
 }
 
-static bool call(const ObjClosure* closure, const int arg_count)
+static bool call(const ObjClosure* closure, int arg_count)
 {
     if (arg_count != closure->func->arity)
     {
@@ -196,7 +196,7 @@ static bool call(const ObjClosure* closure, const int arg_count)
     return true;
 }
 
-static bool call_value(const Value callee, const int arg_count)
+static bool call_value(Value callee, int arg_count)
 {
     if (IS_OBJ(callee))
     {
@@ -253,7 +253,7 @@ static bool call_value(const Value callee, const int arg_count)
 }
 
 static bool invoke_from_class(const ObjClass*  klass,
-                              const ObjString* name, const int arg_count)
+                              const ObjString* name, int arg_count)
 {
     Value method;
     if (!table_find(&klass->methods, name, &method))
@@ -265,7 +265,7 @@ static bool invoke_from_class(const ObjClass*  klass,
     return call(AS_CLOSURE(method), arg_count);
 }
 
-static bool invoke(const ObjString* method_name, const int arg_count)
+static bool invoke(const ObjString* method_name, int arg_count)
 {
     const Value recv = peek(arg_count);
     if (!IS_INSTANCE(recv))

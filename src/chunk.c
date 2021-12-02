@@ -31,7 +31,7 @@ void free_chunk(Chunk* chunk)
     init_chunk(chunk);
 }
 
-void write_chunk(Chunk* chunk, const uint8_t byte, const int line)
+void write_chunk(Chunk* chunk, uint8_t byte, int line)
 {
     if (chunk->capacity < chunk->count + 1)
     {
@@ -70,7 +70,7 @@ void write_chunk(Chunk* chunk, const uint8_t byte, const int line)
 }
 
 #ifdef CHUNK_LINE_RUN_LENGTH_ENCODING
-int get_line(const Chunk* chunk, const int offset)
+int get_line(const Chunk* chunk, int offset)
 {
     int start = 0;
     int end   = chunk->line_count - 1;
@@ -91,7 +91,7 @@ int get_line(const Chunk* chunk, const int offset)
 }
 #endif
 
-int add_constant(Chunk* chunk, const Value value)
+int add_constant(Chunk* chunk, Value value)
 {
     push(value);
     write_value_array(&chunk->constants, value);

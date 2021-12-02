@@ -38,7 +38,7 @@ typedef enum
     PrecPrimary
 } Precedence;
 
-typedef void (*ParseFn)(const bool can_assign);
+typedef void (*ParseFn)(bool can_assign);
 
 typedef struct
 {
@@ -147,7 +147,7 @@ static void advance()
     }
 }
 
-static void consume(const TokenType type, const char* message)
+static void consume(TokenType type, const char* message)
 {
     if (parser.current.type == type)
         advance();
@@ -155,12 +155,12 @@ static void consume(const TokenType type, const char* message)
         error_at_current(message);
 }
 
-static bool check(const TokenType type)
+static bool check(TokenType type)
 {
     return parser.current.type == type;
 }
 
-static bool match(const TokenType type)
+static bool match(TokenType type)
 {
     if (!check(type))
         return false;
@@ -168,12 +168,12 @@ static bool match(const TokenType type)
     return true;
 }
 
-static void emit_byte(const uint8_t byte)
+static void emit_byte(uint8_t byte)
 {
     write_chunk(current_chunk(), byte, parser.previous.line);
 }
 
-static void emit_bytes(const uint8_t byte1, const uint8_t byte2)
+static void emit_bytes(uint8_t byte1, uint8_t byte2)
 {
     emit_byte(byte1);
     emit_byte(byte2);
@@ -181,7 +181,7 @@ static void emit_bytes(const uint8_t byte1, const uint8_t byte2)
 
 #define BACKPATCH_PLACEHOLDER 0xFF
 
-static int emit_jump(const uint8_t jump_instruction)
+static int emit_jump(uint8_t jump_instruction)
 {
     emit_byte(jump_instruction);
     emit_byte(BACKPATCH_PLACEHOLDER);
@@ -189,7 +189,7 @@ static int emit_jump(const uint8_t jump_instruction)
     return current_chunk()->count - 2;
 }
 
-static void emit_loop(const int loop_start)
+static void emit_loop(int loop_start)
 {
     emit_byte(OpLoop);
 
@@ -201,7 +201,7 @@ static void emit_loop(const int loop_start)
     emit_byte(offset & BACKPATCH_PLACEHOLDER);
 }
 
-static void backpatch(const int offset)
+static void backpatch(int offset)
 {
     const int jump = current_chunk()->count - offset - 2;
     if (jump > UINT16_MAX)
@@ -223,7 +223,7 @@ static void emit_return()
     emit_byte(OpReturn);
 }
 
-static uint8_t make_constant(const Value value)
+static uint8_t make_constant(Value value)
 {
     const int constant_index = add_constant(current_chunk(), value);
     if (constant_index > UINT8_MAX)
@@ -234,12 +234,12 @@ static uint8_t make_constant(const Value value)
     return (uint8_t)constant_index;
 }
 
-static void emit_constant(const Value value)
+static void emit_constant(Value value)
 {
     emit_bytes(OpConstant, make_constant(value));
 }
 
-static void init_compiler(Compiler* compiler, const FunctionType type)
+static void init_compiler(Compiler* compiler, FunctionType type)
 {
     compiler->enclosing   = current;
     compiler->func        = NULL;
@@ -304,25 +304,25 @@ static void end_scope()
     }
 }
 
-static void grouping(__attribute__((unused)) const bool can_assign)
+static void grouping(__attribute__((unused)) bool can_assign)
 {
     expression();
     consume(TokenRightParen, "Expect ')' after expression.");
 }
 
-static void number(__attribute__((unused)) const bool can_assign)
+static void number(__attribute__((unused)) bool can_assign)
 {
     const double value = strtod(parser.previous.start, NULL);
     emit_constant(NUMBER_VAL(value));
 }
 
-static void string(__attribute__((unused)) const bool can_assign)
+static void string(__attribute__((unused)) bool can_assign)
 {
     emit_constant(OBJ_VAL(copy_string(parser.previous.start + 1,
                                       parser.previous.length - 2)));
 }
 
-static void named_variable(const Token name, const bool can_assign)
+static void named_variable(Token name, bool can_assign)
 {
     uint8_t read_op   = 0;
     uint8_t assign_op = 0;
@@ -354,12 +354,12 @@ static void named_variable(const Token name, const bool can_assign)
         emit_bytes(read_op, variable_index);
 }
 
-static void variable(const bool can_assign)
+static void variable(bool can_assign)
 {
     named_variable(parser.previous, can_assign);
 }
 
-static void unary(__attribute__((unused)) const bool can_assign)
+static void unary(__attribute__((unused)) bool can_assign)
 {
     const TokenType op_type = parser.previous.type;
 
@@ -378,7 +378,7 @@ static void unary(__attribute__((unused)) const bool can_assign)
     }
 }
 
-static void binary(__attribute__((unused)) const bool can_assign)
+static void binary(__attribute__((unused)) bool can_assign)
 {
     const TokenType  op_type = parser.previous.type;
     const ParseRule* rule    = get_rule(op_type);
@@ -424,7 +424,7 @@ static void binary(__attribute__((unused)) const bool can_assign)
     }
 }
 
-static void literal(__attribute__((unused)) const bool can_assign)
+static void literal(__attribute__((unused)) bool can_assign)
 {
     switch (parser.previous.type)
     {
@@ -442,7 +442,7 @@ static void literal(__attribute__((unused)) const bool can_assign)
     }
 }
 
-static void and_fn(__attribute__((unused)) const bool can_assign)
+static void and_fn(__attribute__((unused)) bool can_assign)
 {
     const int end_jump = emit_jump(OpJumpIfFalse);
     emit_byte(OpPop);
@@ -450,7 +450,7 @@ static void and_fn(__attribute__((unused)) const bool can_assign)
     backpatch(end_jump);
 }
 
-static void or_fn(__attribute__((unused)) const bool can_assign)
+static void or_fn(__attribute__((unused)) bool can_assign)
 {
     const int else_jump = emit_jump(OpJumpIfFalse);
     const int end_jump  = emit_jump(OpJump);
@@ -462,13 +462,13 @@ static void or_fn(__attribute__((unused)) const bool can_assign)
     backpatch(end_jump);
 }
 
-static void call(__attribute__((unused)) const bool can_assign)
+static void call(__attribute__((unused)) bool can_assign)
 {
     const uint8_t arg_count = argument_list();
     emit_bytes(OpCall, arg_count);
 }
 
-static void dot(const bool can_assign)
+static void dot(bool can_assign)
 {
     consume(TokenIdentifier, "Expect property name after '.'.");
 
@@ -489,7 +489,7 @@ static void dot(const bool can_assign)
         emit_bytes(OpGetProperty, property);
 }
 
-static void this_fn(__attribute__((unused)) const bool can_assign)
+static void this_fn(__attribute__((unused)) bool can_assign)
 {
     if (current_class == NULL)
     {
@@ -500,7 +500,7 @@ static void this_fn(__attribute__((unused)) const bool can_assign)
     variable(false);
 }
 
-static void super_fn(__attribute__((unused)) const bool can_assign)
+static void super_fn(__attribute__((unused)) bool can_assign)
 {
     if (current_class == NULL)
         error("Can't use 'super' outside of a class.");
@@ -570,12 +570,12 @@ const ParseRule RULES[] = {
   [TokenEOF]          = {NULL, NULL, PrecNone},
 };
 
-static const ParseRule* get_rule(const TokenType type)
+static const ParseRule* get_rule(TokenType type)
 {
     return &RULES[type];
 }
 
-static void parse_precedence(const Precedence prec)
+static void parse_precedence(Precedence prec)
 {
     advance();
 
@@ -626,8 +626,8 @@ static int resolve_local(const Compiler* compiler, const Token* name)
     return -1;
 }
 
-static int upvalue_exists(const Compiler* compiler, const uint8_t index,
-                          const bool is_local, const int upvalue_count)
+static int upvalue_exists(const Compiler* compiler, uint8_t index,
+                          bool is_local, int upvalue_count)
 {
     for (int i = 0; i < upvalue_count; i++)
     {
@@ -638,7 +638,7 @@ static int upvalue_exists(const Compiler* compiler, const uint8_t index,
     return -1;
 }
 
-static int add_upvalue(Compiler* compiler, const uint8_t index, const bool is_local)
+static int add_upvalue(Compiler* compiler, uint8_t index, bool is_local)
 {
     const int upvalue_count = compiler->func->upvalue_count;
     if (upvalue_count == UINT8_COUNT)
@@ -675,7 +675,7 @@ static int resolve_upvalue(Compiler* compiler, const Token* name)
     return -1;
 }
 
-static void add_local(const Token name)
+static void add_local(Token name)
 {
     if (current->local_count == UINT8_COUNT)
     {
@@ -725,7 +725,7 @@ static void mark_initialized()
     current->locals[current->local_count - 1].depth = current->scope_depth;
 }
 
-static void define_variable(const uint8_t global)
+static void define_variable(uint8_t global)
 {
     if (current->scope_depth > 0)
     {
@@ -778,7 +778,7 @@ static void var_declaration()
     define_variable(variable_name);
 }
 
-static void function(const FunctionType type)
+static void function(FunctionType type)
 {
     Compiler compiler;
     init_compiler(&compiler, type);

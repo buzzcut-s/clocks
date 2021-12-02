@@ -22,7 +22,7 @@ void free_table(Table* table)
     init_table(table);
 }
 
-static Entry* find_entry(Entry* entries, const int capacity, const ObjString* key)
+static Entry* find_entry(Entry* entries, int capacity, const ObjString* key)
 {
 #ifdef TABLE_OPTIMIZED_FIND_ENTRY
     uint32_t index = key->hash & (capacity - 1);
@@ -55,7 +55,7 @@ static Entry* find_entry(Entry* entries, const int capacity, const ObjString* ke
     }
 }
 
-static void adjust_capacity(Table* table, const int capacity)
+static void adjust_capacity(Table* table, int capacity)
 {
     Entry* entries = ALLOCATE(Entry, capacity);
     for (int i = 0; i < capacity; i++)
@@ -82,7 +82,7 @@ static void adjust_capacity(Table* table, const int capacity)
     table->capacity = capacity;
 }
 
-bool table_insert(Table* table, ObjString* key, const Value value)
+bool table_insert(Table* table, ObjString* key, Value value)
 {
     if (table->count + 1 > table->capacity * TABLE_MAX_LOAD)
     {
@@ -144,7 +144,7 @@ void table_copy(const Table* src, Table* dest)
 }
 
 ObjString* table_find_string(const Table* table, const char* chars,
-                             const int length, const uint32_t hash)
+                             int length, uint32_t hash)
 {
     if (table->count == 0)
         return NULL;

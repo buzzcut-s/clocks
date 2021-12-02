@@ -13,7 +13,7 @@
 #define ALLOCATE_OBJ(type, obj_type) \
     (type*)allocate_obj(sizeof(type), obj_type)
 
-static Obj* allocate_obj(const size_t size, const ObjType type)
+static Obj* allocate_obj(size_t size, ObjType type)
 {
     Obj* object  = (Obj*)reallocate(NULL, 0, size);
     object->type = type;
@@ -37,7 +37,7 @@ static Obj* allocate_obj(const size_t size, const ObjType type)
 }
 
 #ifndef OBJECT_STRING_FLEXIBLE_ARRAY
-static ObjString* allocate_string(char* chars, const int length, const uint32_t hash)
+static ObjString* allocate_string(char* chars, int length, uint32_t hash)
 {
     ObjString* string = ALLOCATE_OBJ(ObjString, ObjTypeString);
     string->length    = length;
@@ -50,7 +50,7 @@ static ObjString* allocate_string(char* chars, const int length, const uint32_t 
 }
 #endif
 
-uint32_t hash_string(const char* key, const int length)
+uint32_t hash_string(const char* key, int length)
 {
     static const unsigned int FNV_OFFSET_BASIS = 2166136261U;
 #ifndef TABLE_FNV_GCC_OPTIMIZATION
@@ -70,7 +70,7 @@ uint32_t hash_string(const char* key, const int length)
 }
 
 #ifdef OBJECT_STRING_FLEXIBLE_ARRAY
-ObjString* allocate_string(const int length)
+ObjString* allocate_string(int length)
 {
     ObjString* string = (ObjString*)allocate_obj(sizeof(ObjString) + length + 1, ObjTypeString);
     string->length    = length;
@@ -85,7 +85,7 @@ static void intern_string(ObjString* string)
 }
 
 static void init_string(ObjString* string, const char* chars,
-                        const int length, const uint32_t hash)
+                        int length, uint32_t hash)
 {
     memcpy(string->chars, chars, length);
     string->hash          = hash;
@@ -108,7 +108,7 @@ ObjString* take_string(char* chars, const int length)
 }
 #endif
 
-ObjString* copy_string(const char* chars, const int length)
+ObjString* copy_string(const char* chars, int length)
 {
     const uint32_t hash = hash_string(chars, length);
 
